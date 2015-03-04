@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+surely 'wipe existing keys' && rm -frv "$HOME/.gnupg"
+surely 'generate new key' && gpg --full-generate-key

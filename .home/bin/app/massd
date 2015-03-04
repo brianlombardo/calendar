@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+if [[ "$1" ]]; then url_path="search/$@"; fi
+open "https://drop.com/${url_path:-transactions}"

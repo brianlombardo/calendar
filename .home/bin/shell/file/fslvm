@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+function _stripe {
+  [[ "$5" ]] && pv1=$1 && pv2=$2 && vg=$3 && size_gb=$4 && stripe_kb=$5
+  ! [[ "$pv1" && "$pv2" && "$vg" && "$size_gb" && "$stripe_kb" ]] &&\
+    parrot magenta 'vars/args:
+pv1=/dev/sda1
+pv2=/dev/sdb1
+vg=lvm_trnqilo
+size_gb=480
+stripe_kb=64' && return 1
+
+  lv_size="`clac $size_gb x 1000`M"
+  sudo pvcreate $pv1
+  sudo pvcreate $pv2
+  sudo vgcreate $vg $pv1 $pv2
+  sudo lvcreate -i 2 -I $stripe_kb -L $lv_size $vg
+}
+
+_$@

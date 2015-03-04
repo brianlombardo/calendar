@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+set -e
+
+[[ ! "$1" ]] && echo 'functions:
+
+make [image.img]
+mount [-p] [image.img]
+unmount
+grow [image.img]
+list
+' && exit
+
+function _make {
+  _loopimage "$1"
+
+  [[ "$2" ]] && loopsize="$2" || read -p 'loop size MB [10240] ' loopsize
+  loopsize=${loopsize:-'10240'}
+
+  fs="${3:-"ext4"}"
+  surely "make $fs in '$loopimage' with size of $loopsize MB"
+
+  sudo bash -c "dd if=/dev/zero of='$loopimage' bs=1M count=$loopsize"
+  sudo mkfs.$fs "$loopimage"
+}
+
+function _mount {
+  [[ "$1" == '-p' ]] && shift && partition='true'
+
+  _loopimage "$1"
+  loopmount "$2"
+
+  if [[ "$partition" ]]; then
+    local loopinfo="`sudo fdisk -lu "$loopimage"`"
+    local sectorsize=`echo "$loopinfo" | grep 'Sector size' | $awk '{print $7}'`
+    local partstart=`echo "$loopinfo" | grep 'Linux' | $awk '{print $2}'`
+
+    flags="-o `clac $sectorsize x $partstart`"
+  fi
+
+  surely "mount loop '$loopimage' to '$loopmount'" || return
+
+  sudo losetup $flags -fP "$loopimage"
+  sudo mkdir -p "$loopmount"
+  sudo mount -o loop "`loopdev`" "$loopmount"
+}
+
+function _parts {
+  [[ ! -f "$1" ]] && echo 'pass image file' && exit
+  sudo fdisk -lu "$1"
+  sudo losetup -f --show -P "$1"
+}
+
+function _unmount {
+  loopmount "$1"
+
+  sudo umount "$loopmount"
+  sudo losetup -d "`loopdev`"
+}
+
+function _ls { sudo losetup -a; }
+
+function _loopimage {
+  if [[ "$1" ]]; then
+    loopimage="$1"
+  else
+    read -p 'loop file [image.img] ' loopimage
+    loopimage=${loopimage:-'image.img'}
+  fi
+}
+
+function loopmount {
+  [[ "$1" ]] && loopmount="$1" || read -p 'loopmount [./loopy] ' loopmount
+  loopmount=${loopmount:-"`pwd`/loopy"}
+}
+
+function loopdev {
+  local device=`list | grep "$loopimage" | $awk '{print $1}'`
+  echo ${device//\:/}
+}
+
+_$@

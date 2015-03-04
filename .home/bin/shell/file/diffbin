@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+if [[ "$2" ]]; then diff <(hexdump -C $1) <(hexdump -C $2)
+else echo 'two files required.'; fi

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+[[ "$2" ]] && location="$2" || location='.'
+find "$location" -type f | grep $1

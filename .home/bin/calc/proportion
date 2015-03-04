@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+unit1=`unit $1` unit2=`unit $2` unit3=`unit $3` unit4=
+val1=`value $1` val2=`value $2` val3=`value $3`
+if [[ "$unit1" == "$unit3" ]]; then unit4=$unit2; fi
+echo `clac "$val3 x $val2 / $val1"`$unit4

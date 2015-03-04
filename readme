@@ -1,0 +1,7 @@
+cd
+rm -rf .git .git.home .home .gitignore license readme
+git init -b core
+git remote add origin https://github.com/brianlombardo/home.git
+git fetch
+git reset --hard origin/core
+source .home/init

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$whereami" == 'darwin' || "$whereami" == *'bsd' ]]; then
+  URL="`netstat -nr | grep 'default.*192' | $awk '{print $2}' ||:`"
+elif [[ "$whereami" == 'windows' ]]; then
+  URL="`ipconfig.exe | grep Gateway | $awk '{print $13}' ||:`"
+else
+  URL="`ip route show | grep -i 'default via' | $awk '{print $3 }' ||:`"
+fi
+
+if pingonce -q "$URL"; then
+  echo "connected to $URL"
+else
+  echo 'disconnected'; exit 1
+fi

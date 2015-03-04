@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+if [[ ! -f '/dev/shm/hsquiet' ]]; then
+  source /etc/default/housesitter
+  /usr/local/bin/hsmessage "TRIPPED $TRIP_MESSAGE"
+fi

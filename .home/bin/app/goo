@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+
+function search { query="$@"; open "https://$subdomain.google.com/search?q=${query// /+}"; }
+
+if [[ "$1" == 'mail' ]]; then shift
+  open "https://mail.google.com/mail/u/${1:-0}/#inbox"
+elif [[ "$1" == 'msg' ]]; then shift
+  open "https://messages.google.com/web/u/${1:-0}/conversations"
+elif [[ "$1" == 'voice' ]]; then shift
+  open "https://voice.google.com/u/${1:-0}/messages"
+elif [[ "$1" == 'cal' ]]; then shift
+  open "https://calendar.google.com/calendar/u/${1:-0}/r"
+elif [[ "$1" == 'news' ]]; then shift
+  subdomain='news' search $@
+elif [[ "$1" == 'youtube' || "$1" == 'yt' ]]; then urlpath=''
+  if [[ "$2" ]]; then shift; urlpath="results?search_query=$@"; fi
+  open "https://www.youtube.com/$urlpath"
+elif [[ "$1" ]]; then
+  subdomain='www' search $@
+else
+  open 'https://google.com'
+fi

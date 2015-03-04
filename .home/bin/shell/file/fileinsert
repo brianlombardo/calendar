@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -e
+
+function head_tail_init {
+  file_contents="`cat "$filename"`"
+  total_lines="`echo "$file_contents" | wc -l`"
+}
+
+function head_tail {
+  head="`echo "$file_contents" | head -n$head_lines`"
+  tail="`echo "$file_contents" | tail -n$tail_lines`"
+}
+
+filename="$1"; shift
+
+if [[ "$1" == '--top' ]]; then shift
+  echo "$@
+`cat $filename`" > "$filename"
+
+elif [[ "$1" == '--head' ]]; then shift
+  head_lines="$1"; shift
+  head_tail_init
+  tail_lines="`clac $total_lines - $head_lines`"
+  head_tail
+
+  echo "$head
+$@
+$tail" > "$filename"
+
+elif [[ "$1" == '--tail' ]]; then shift
+  tail_lines="$1"; shift
+  head_tail_init
+  head_lines="`clac $total_lines - $tail_lines`"
+  head_tail
+
+  echo "$head
+$@
+$tail" > "$filename"
+
+else
+  echo "$@" >> "$filename"
+fi

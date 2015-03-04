@@ -1,0 +1,20 @@
+function trnqilo {
+  if surely reset trnqilo; then
+    cd
+    rm -rf .git .git.home .home .gitignore license readme
+    git init -b ${1:-main}
+    git remote add origin https://github.com/trnqilo/home.git
+    git fetch
+    git reset --hard origin/${1:-main}
+    source .home/init
+  fi
+}
+
+alias up='if type homeup &>/dev/null; then homeup; else homesync; fi;'
+alias home='edi "$DOTHOME";'
+alias holo='mkdir -p "$HOLO" && edi "$HOLO";'
+alias lopro='mkdir -p "$HOME/.local" && edi "$HOME/.local/profile";'
+alias ssh-keygen-ed='ssh-keygen -t ed25519'
+alias ssh-keygen-rsa='ssh-keygen -t rsa'
+alias ssh-regen='ssh-keygen -y -f'
+alias passgen='openssl passwd' # -1

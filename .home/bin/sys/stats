@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$1" =~ ^[0-9]+$ ]]; then
+  time=$1; shift; watch -tcn $time "$0" $@; exit
+fi
+
+function _stats_cpu {
+  ( if [[ -f '/proc/cpuinfo' ]]; then
+    grep '^model name' /proc/cpuinfo | head -1 | $awk '{$1=$2=$3="";print $0}' \
+      | xargs | $awk '{print $0"\n "}'
+    grep 'cpu.*MHz' /proc/cpuinfo  | $awk '{print $4/1000.0}' | round 2 | \
+    while read clock; do
+      [[ "$i" ]] && let ++i || let i=4
+      if (( i == 4 )); then echo; i=0; fi
+      printf "$clock GHz\t";
+    done
+  fi ) | grep -v '^$' ||:
+  if type vcgencmd &>/dev/null; then echo
+    vcgencmd measure_temp; vcgencmd get_throttled; vcgencmd measure_volts; vcgencmd measure_clock 1
+  fi
+  if [[ -f '/proc/sys/dev/cpu' ]] && type kldstat &>/dev/null; then echo
+    kldstat | grep -q coretemp || sudo kldload coretemp
+    sysctl dev.cpu | grep temperature | $awk '{print $2}'
+  fi
+}
+
+function _stats_gpu {
+  if type nvidia-smi &>/dev/null; then echo
+    nv=`nvidia-smi --query-gpu=gpu_name,temperature.gpu --format=csv | tail -1 | $awk -F, '{print $1":\t+"$2*1.0"°C"}'`
+    nv="${nv//'NVIDIA '/}"; echo "${nv//'GeForce '/}"
+    nvidia-smi -q -d CLOCK | grep '  Clocks$' -A4 | grep -iE 'graphics|SM|Memory|Video' | \
+    while read clock; do printf "\n${clock/'                   :'/}"; done && echo
+  fi
+}
+
+function _stats_mobo { echo; mobo; if type sensors &>/dev/null; then echo; sensors; fi; }
+
+function _stats_mem { if type free &>/dev/null; then echo; free -h; fi; }
+
+function _stats_time { if type uptime &>/dev/null; then echo; uptime|xargs; fi; }
+
+if [[ "$1" ]]; then
+  while [[ "$1" ]]; do _stats_$1; shift; done
+else
+  _stats_cpu;_stats_gpu;_stats_mobo;_stats_mem;_stats_time
+fi

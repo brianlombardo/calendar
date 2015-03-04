@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+[[ "$1" ]] && testdata="$1" && shift || testdata="1024"
+[[ "$1" ]] && testroot="$@" || testroot="."
+
+dd if=/dev/zero of="$testroot/.disktest" bs=1M count="$testdata" status=progress
+
+rm -f "$testroot/.disktest"

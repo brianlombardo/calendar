@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+# if type discord &>/dev/null; then
+# discord
+# elif [[ -d "$localappdata/Discord${flavor}" ]]; then
+#   secretly "$localappdata/Discord${flavor}/Update.exe --processStart Discord${flavor}.exe"
+# elif open -a Discord${flavor} &>/dev/null; then
+#   :
+# else
+  open 'https://discord.com/channels/@me'
+# fi

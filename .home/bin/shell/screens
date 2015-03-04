@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+
+label="$1"; shift
+screen -x "$label" || screen -m -S "$label" "$@"

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ ! -s "$1" ]]; then echo 'provide a file.';  exit 1; fi
+
+script="$1"
+shift
+shebang='#!/usr/bin/env'
+
+if ! head -1 "$script" | grep -q "$shebang"; then
+  surely sure "shebang $script"
+
+  [[ "$1" ]] && script_init="$@" || script_init='bash
+set -e'
+  shebang+=" $script_init"
+  fileinsert "$script" --top "$shebang
+"
+  chmod +x "$script"
+else
+  echo "$script already shebung"
+fi

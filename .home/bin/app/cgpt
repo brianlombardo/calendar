@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+query="$@"; open "https://chat.openai.com/?q=${query// /+}"

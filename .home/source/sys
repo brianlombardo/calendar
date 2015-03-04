@@ -1,0 +1,4 @@
+
+alias iommus='for device in /sys/kernel/iommu_groups/*/devices/*; do group=${device#*/iommu_groups/*}; echo "group ${group%%/*} `lspci -nns ${device##*/}`"; done | gg "Group [[:digit:]]|Group [[:digit:]][[:digit:]]"'
+
+alias stresstest='stress -c "${cores:-"4"}" -i "${io:-"1"}" -m "${memory:-"1"}" -t "${time:-"60"}"'

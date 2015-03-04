@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set  -e
+
+function _serv_darwin {
+  if [[ "$operation" == 'status' ]]; then operation='info'; fi
+  if [[ ! "$service" ]]; then service='--all'; fi
+  brew services $operation $service
+}
+
+function _serv_freebsd { sudo service "$service" "$operation";}
+
+function _serv_openbsd { sudo rcctl "$operation" "$service"; }
+
+function _serv_linux { sudo systemctl "$operation" "$service"; }
+
+function _serv_windows {
+  if [[ "$operation" =~ ^disable$|^mask$ ]]; then
+    sc config "$service" start=disabled
+  elif [[ "$operation" =~ ^enable$|^unmask$ ]]; then
+    sc config "$service" start=auto
+  else
+    net "$operation" "$service"
+  fi
+}
+
+if [[ ! "$1" || "$1" =~ ^s(tat)?$ ]]; then operation='status'
+elif [[ "$1" =~ ^up?$ ]]; then operation='start'
+elif [[ "$1" =~ ^d(own)?$ ]]; then operation='stop'
+elif [[ "$1" =~ ^r(ez)?$ ]]; then operation='restart'
+else operation="$1"; fi
+shift ||:
+if [[ "$1" ]]; then
+  while [[ "$1" ]]; do service="$1"
+    _serv_$whereami
+    if [[ "$operation" != 'status' ]]; then
+      operation=status _serv_$whereami
+    fi
+    shift
+  done
+else
+  _serv_$whereami
+fi

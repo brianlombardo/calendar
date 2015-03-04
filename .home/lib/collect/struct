@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+function struct {
+  [[ "$1" ]] && local name="$1" && shift || return 1
+  [[ "$codegen" ]] || local codegen=eval
+  [[ "$1" == '{' ]] && shift
+  local struct="unset $name; $name=("
+  while [[ "$1" && "$1" != '}' ]]; do struct="$struct '$1'"; shift; done
+  $codegen "$struct )
+`__build_struct $name`"
+}
+
+function __build_struct {
+  function build_base { discards+="$1.keys $1.size"; echo "
+function $1.keys { echo \"\${!$1[@]}\"; }
+function $1.size { echo \"\${#$1[@]}\"; }"
+  }
+
+  function build_list { discards+="$1.add $1.get $1.set $1.unset"; echo "
+function $1.add { [[ \"\$1\" ]] && $1+=(\"\$@\"); }
+function $1.get { [[ \"\$1\" ]] && echo \"\${$1[\"\$1\"]}\" || echo \"\${$1[*]}\"; }
+function $1.set { [[ \"\$1\" ]] && local key=\"\$1\" && shift && $1[\"\$key\"]=\"\$@\"; }
+function $1.unset { [[ \"\$1\" ]] && [[ \${$1[\"\$1\"]} ]] && unset $1[\"\$1\"]; }"
+  }
+
+  function build_stack { discards+="$1.top $1.push $1.pop"; echo "
+function $1.top { echo \"\${$1[\$((\`$1.size\`-1))]}\"; }
+function $1.push { [[ \"\$1\" ]] && $1+=(\"\$@\"); }
+function $1.pop { unset $1[\$((\`$1.size\`-1))]; }"
+  }
+
+  function build_discard { echo "
+function $1.discard { unset $1; unset -f $discards; }"
+  }
+
+  local discards=''
+  local name="$1"; shift
+  build_base $name
+  if [[ ! "$1" ]]; then build_list $name && build_stack $name
+  else while [[ "$1" ]]; do build_$1 $name && shift; done; fi
+  build_discard $name
+  unset -f build_base build_list build_stack build_discard
+}

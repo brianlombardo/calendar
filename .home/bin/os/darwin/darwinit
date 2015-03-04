@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -e
+
+
+defaults write com.apple.Dock showhidden -bool true
+defaults write com.apple.Dock autohide -bool false
+defaults write com.apple.Dock scroll-to-open -bool true
+defaults write com.apple.Dock slow-motion-allowed -bool true
+
+defaults write com.apple.Finder AppleShowAllFiles true
+defaults write com.apple.Finder _FXShowPosixPathInTitle -bool true
+defaults write com.apple.Finder QuitMenuItem -bool true
+defaults write com.apple.Finder CreateDesktop -bool ${desk:-false}
+
+defaults write -g ApplePressAndHoldEnabled -bool false
+
+if [[ "$1" == 'lock' ]]; then lock=true; fi
+defaults write com.apple.Dock position-immutable -bool ${lock:-false}
+defaults write com.apple.Dock size-immutable -bool ${lock:-false}
+defaults write com.apple.Dock contents-immutable -bool ${lock:-false}
+
+
+killall Finder
+killall Dock
+
+# sudo defaults write /Library/Preferences/com.apple.windowserver DisplayResolutionEnabled -bool true
+# sudo nvram StartupMute=%01
+
+osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true'

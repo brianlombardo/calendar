@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ ! "$ADO_BOARD" ]]; then echo 'ADO_BOARD not set. eg. COMPANY/PROJECT/_boards/board/t/BOARD_NAME/Stories'; exit; fi
+
+ado_url="https://dev.azure.com/$ADO_BOARD"
+
+if [[ "$1" ]]; then while [[ "$1" ]]; do
+  open "$ado_url?workitem=$1"; shift
+  done
+else
+  open "$ado_url"
+fi

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ -f '/dev/shm/hsquiet' ]]; then
+  sudo mv /dev/shm/hsquiet /dev/shm/hschatty
+else
+  sudo touch /dev/shm/hschatty
+fi

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ ! "$1" ]]; then echo 'usage: bbcfg save|apply|xrdp'; exit; fi
+
+function _bbcfg_apply { cp "$DOTHOME/conf/blackbox/.blackbox"* "$HOME"; }
+
+function _bbcfg_save {	cp "$HOME/.blackbox"* "$DOTHOME/conf/blackbox"; }
+
+function _bbcfg_xrdp { echo 'blackbox-session' > "$HOME/.xsession"; }
+
+function _bbcfg_install { pkg i blackbox xinit; }
+
+_bbcfg_$1

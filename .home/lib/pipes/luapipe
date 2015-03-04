@@ -1,0 +1,4 @@
+#!/usr/bin/env lua
+
+for line in io.lines() do print(line) end
+for i,arg in ipairs(arg) do print(arg) end

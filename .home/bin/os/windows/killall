@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+while [[ "$1" ]]; do taskkill -im "$1.exe" -f; shift; done
