@@ -1,0 +1,2 @@
+echo 'command alias poc expression -l objc -O --
+command alias flush expression -l objc -- (void)[CATransaction flush]' > $HOME/.lldbinit

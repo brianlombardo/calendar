@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "notes": "",
+  "documentation": "",
+  "keyboard": "drop/thekey/v2",
+  "keymap": "foot_pedal",
+  "layout": "LAYOUT",
+  "layers": [
+    [
+      "KC_V",
+      "KC_NO",
+      "RGB_HUI"
+    ]
+  ],
+  "author": "foot"
+}

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -e
+
+cd "$HOME"
+if [[ "$1" =~ ^r(un)?$ ]]; then
+  docker run -p3333:3389 -p2222:22 -it trnqilo
+elif [[ "$1" =~ ^b(uild)?$ ]]; then
+  docker build -t trnqilo .
+else
+  homeos="${1:-debian:bookworm}"; shift ||:
+  pkgs="${@:-vim git tmux xrdp xfce4}"
+  echo "FROM $homeos
+RUN useradd -ms /usr/bin/bash $USER
+RUN mkdir -p /home/$USER/.home && chown -R $USER: /home/$USER
+COPY ./.home /home/$USER/.home
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y $pkgs
+WORKDIR /home/$USER
+USER $USER
+RUN ./.home/init
+RUN echo xfce4-session > .xsession
+CMD [\"bash\"]" > ./Dockerfile
+  bat ./Dockerfile # DEBIAN_FRONTEND=noninteractive apt-get...
+fi

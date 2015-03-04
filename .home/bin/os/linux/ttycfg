@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -e
+
+function checktty { [[ "$TTY" == '/dev/tty'* ]] || exit; }
+
+function _ttycfg_font { checktty && setfont $@; }
+
+function _ttycfg_hidpi { checktty && setfont sun12x22; }
+
+function _ttycfg_zzz { setterm --blank 1; }
+
+function _ttycfg_init {
+  ttynum="${1:-1}"
+  username="${2:-$USER}"
+  service="[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --noissue --autologin $username %I \$TERM
+Type=idle"
+  script="
+  mkdir -p /etc/systemd/system/getty@tty$ttynum.service.d
+  echo '$service' > /etc/systemd/system/getty@tty$ttynum.service.d/override.conf
+"
+  echo -e "\n\n$service\n\n"
+  surely "write service for tty$ttynum"
+
+  sudo bash -c "$script"
+}
+
+_ttycfg_$@

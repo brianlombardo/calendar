@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+if [[ ! "$2" ]]; then echo 'usage: rsyncs /path/to/source /path/to/dest excludes...'
+else
+  source="$1" dest="$2" exclude=; shift 2
+  while [[ "$1" ]]; do exclude+="--exclude '$1' "; shift; done
+  rsync -a --progress --checksum --ignore-errors $exclude "$source/." "$dest"
+fi
+
+# set custom ssh port in $HOME/.ssh/config
+# Host _host_
+# Port _custom_port_

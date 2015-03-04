@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -e
+
+step=${1:-`cat`}
+reversed=0
+
+while (( step > 0 )); do
+  onesPlace=$(( step % 10 ))
+  reversed=$(( reversed * 10 + onesPlace ))
+  step=$(( step / 10 ))
+done
+
+echo "$reversed"

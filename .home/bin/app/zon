@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+if [[ "$1" =~ ^o(rder)?s?$ ]]; then shift
+  urlpath="gp/legacy/order-history?opt=ab&search=$@"
+elif [[ "$1" ]]; then
+  query="$@"
+  urlpath="s?k=${query// /+}"
+else
+  urlpath='orders'
+fi
+
+open "https://www.amazon.com/$urlpath"

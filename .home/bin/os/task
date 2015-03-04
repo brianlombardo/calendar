@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+tasks="`ps aux`"
+if [[ "$1" ]]; then
+  echo "$tasks" \
+    | grep -i "$@" \
+    | grep -v "$(cd -- "$(dirname "$0")">/dev/null 2>&1;pwd -P)"
+else
+  echo "$tasks"
+fi

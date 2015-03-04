@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+# if type via &>/dev/null; then via
+# elif open -a Via &>/dev/null; then :
+# else 
+open 'https://usevia.app/'
+# fi
