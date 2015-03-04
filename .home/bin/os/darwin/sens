@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+happily iStats
+# sudo powermetrics # --samplers smc
+
+

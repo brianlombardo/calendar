@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+set -e
+
+config="${MASQS:-$HOME/.masqs}"
+touch "$config"
+
+function _masqs_import {
+  if ! [[ "$1" && -f "$@" ]]; then echo "not a file: $@"; exit; fi
+  grep 'dhcp-host' "$@" | grep -v '^#' | while read dhcp_host; do
+    config="`echo $dhcp_host | $awk -F , '{print $2" "$1" "$3}'`"
+    echo "${config//'dhcp-host='/}"
+  done | sort -V
+}
+
+function _masqs_add {
+  if [[ ! "$2" ]]; then echo 'usage: masqs add $mac $name [$id]'; return; fi
+
+  mac="`echo $1 | $awk '{print tolower($1)}'`"
+  mac="${mac//':'/}"; mac="${mac//'-'/}"
+  guestname="$2"
+  id="${3:-`next_id`}"
+
+  if [[ ! "$id" ]]; then echo 'all ids used.'
+  elif (( id > 254 || id < 2 )); then echo "invalid id: $id"
+  elif grep -qi "^$id " "$config"; then echo "id already taken: $id"
+  elif grep -qi "$guestname" "$config"; then echo "guest already added: $guestname"
+  elif [[ "${#mac}" != 12 ]]; then echo "mac length is not 12: $mac"
+  elif [[ ! "$mac" =~ ^([a-fA-F0-9]{12})$ ]]; then echo "invalid mac: $mac"
+  elif grep -qi "$mac" "$config"; then echo "mac already added: $mac"
+  else echo "$id" "$mac" "$guestname" >> "$config"
+  fi
+}
+
+function _masqs_serv {
+  init_build
+  echo "no-resolv
+server=$dns
+addn-hosts=/etc/hosts.masqs
+interface=$interface
+dhcp-range=$neighborhood.1,$neighborhood.1,0m"
+
+  _masqs_conf | while read guest; do read_guest $guest
+    echo "dhcp-host=$guestmac,$neighborhood.$guestid,$guestname"
+  done
+}
+
+function _masqs_hosts {
+  init_build
+  _masqs_conf | while read guest; do read_guest $guest
+    echo "$neighborhood.$guestid $guestname.masq"
+  done
+}
+
+function _masqs_denied {
+  cat /var/log/syslog \
+    | grep -iE 'no address' | gawk '{print $7}' | grep '.*:.*:' \
+    | sort | uniq | gawk '{print "dhcp-host="$1",ignore"}'
+}
+
+function _masqs_rez { fw r; serv r dnsmasq; }
+
+function _masqs_block {
+  local hosts=( $@ 'https://winhelp2002.mvps.org/hosts.txt' )
+  curl -s ${hosts[*]} \
+    | grep '^0\.0\.0\.0' | grep -o '^[^#]*' \
+    | sed -e 's/\r/\n/g' | sort | uniq | grep -v '^$'
+}
+
+function _masqs_fw {
+  init_build
+  _masqs_conf | while read guest; do read_guest $guest
+    if [[ "$guestname" != *'offline' ]]; then
+      echo "# $guestname $guestmac"
+      echo "-A POSTROUTING -s $neighborhood.$guestid -o ${MASQ_WAN:-eth0} -j MASQUERADE"
+    fi
+  done
+}
+
+function _masqs_conf { sort -V "$config"; }
+
+function init_build {
+  interface="${MASQS_IF:-br0}"
+  dns="${MASQS_DNS:-1.1.1.1}"
+  neighborhood="`echo "${MASQS_NET:-192.168.123.0}" \
+    | $awk -F . '{print $1"."$2"."$3}'`"
+}
+
+function next_id {
+  ids=({2..254})
+  for id in "${ids[@]}"; do
+    if ! grep -q "^$id " "$config"; then
+      echo "$id"; break
+    fi
+  done
+}
+
+function read_guest { guestid="$1" guestmac="`format_mac $2`" guestname="$3"; }
+
+function format_mac { addr="$@"
+  for (( i = 0; i < ${#addr}; ++i )); do
+    printf "${addr:$i:1}"
+    if (( i % 2 > 0 )) && (( i < ${#addr}-1 ))
+    then printf ':'; fi
+  done
+}
+
+if [[ "$1" ]]; then _masqs_$@; else _masqs_conf; fi

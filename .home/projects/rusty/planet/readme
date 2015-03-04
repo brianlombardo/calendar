@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# rusty planet
+# a small udp game server to exchange position and rotation data between clients
+
+server_command='cargo run'
+client_command='sleep 2 && cargo run --example client'
+tmux new-session "$server_command" \; split-window "$client_command" \; select-layout even-horizontal \; split-window "$client_command" \;

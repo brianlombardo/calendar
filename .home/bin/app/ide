@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$1" == 'jbt' ]]; then
+  if [[ "$whereami" == 'darwin' ]]; then open -a 'JetBrains Toolbox'
+  else
+    if [[ "$whereami" == 'windows' ]]; then cd "$LOCALAPPDATA"
+    else cd "$HOME/.local/share"; fi
+    ./JetBrains/Toolbox/bin/jetbrains-toolbox
+  fi
+  exit
+fi
+
+declare -A ides=(
+  ['as']='studio'
+  ['rr']='rustrover'
+  ['vs']='start devenv'
+  ['xc']='xcopen'
+)
+
+function set_ide { ide="${ides["$1"]}"; }
+
+if [[ "$1" ]]; then set_ide "$1"; fi
+
+if [[ "$ide" ]]; then shift
+elif [[ -d "$1" ]]; then
+  if quietly "cd '$1'; ls ./*/*/main/AndroidManifest.xml"; then set_ide as
+  elif quietly "cd '$1'; ls ./Cargo.toml"; then set_ide rr
+  elif quietly "cd '$1'; ls ./Package.swift"; then set_ide xc
+  elif quietly "cd '$1'; ls ./*.xcodeproj"; then set_ide xc
+  elif quietly "cd '$1'; ls ./*.xcworkspace"; then set_ide xc
+  elif quietly "cd '$1'; ls ./*.sln"; then set_ide vs; fi
+fi
+
+ide="${ide:-idea}"
+if type "$ide" &>/dev/null; then
+  $ide $1 > /dev/null 2>&1 &
+else
+  edi $1
+fi
+
+if [[ "$2" ]]; then shift; ide $@; fi

@@ -1,0 +1,6 @@
+{
+  "KC_ESC": "KC_GRV",
+  "KC_GRV": "KC_ESC",
+  "KC_LGUI": "KC_RCTL",
+  "KC_RCTL": "KC_LGUI"
+}

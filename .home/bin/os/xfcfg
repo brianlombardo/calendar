@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ ! "$1" ]]; then echo 'usage: xfcfg save|apply|xrdp'; exit; fi
+
+xfcfg_local="$HOME/.config/xfce4/xfconf/xfce-perchannel-xml"
+xfcfg_home="$DOTHOME/conf/xfce"
+
+function _xfcfg_save { copy_xmls "$xfcfg_local" "$xfcfg_home"; }
+
+function _xfcfg_apply {
+  if [[ "$1" == 'clean' ]]; then rm -rvf "$xfcfg_local"; fi
+  mkdir -p "$xfcfg_local"
+  copy_xmls "$xfcfg_home" "$xfcfg_local"
+}
+
+function _xfcfg_xrdp {
+  if [[ "$whereami" == 'linux' ]]; then
+    echo "${xsession:-xfce4-session}" > "$HOME/.xsession"
+  elif [[ "$whereami" == *'bsd' ]]; then
+    echo 'source /usr/local/etc/xdg/xfce4/xinitrc' > "$HOME/.xinitrc"
+  fi
+  sudo perl -pi -e s/009cb5/232323/g /etc/xrdp/xrdp.ini
+}
+
+function copy_xmls {
+  cp -v "$1/thunar.xml" "$2"
+  cp -v "$1/xfce4-keyboard-shortcuts.xml" "$2"
+  cp -v "$1/xfwm4.xml" "$2"
+}
+
+_xfcfg_$@

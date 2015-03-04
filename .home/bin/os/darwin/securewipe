@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+echo 'diskutil secureErase freespace 0 /dev/disk0s0
+
+# 0 zero-fill
+# 1 random-fill
+# 2 7-pass dod
+# 3 35-pass gutmann
+# 4 3-pass doe'

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -e
+
+sleep ${1:-0}
+
+if [[ "$whereami" == 'darwin' ]]; then
+  pmset displaysleepnow
+elif [[ "$whereami" == 'windows' ]]; then
+  # scrnsave.scr -s
+  powsh "$DOTHOME/bin/os/windows/displaysleep.bat" &>/dev/null
+elif [[ "$whereami" == 'android' ]]; then
+  input keyevent 26
+fi

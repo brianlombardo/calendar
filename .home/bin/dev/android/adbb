@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+set -e
+
+function _adbb_all { _adbb_do $@ for `_adbb_ls`; }
+
+function _adbb_cat { [[ "$1" ]] && logcat_flags="--pid=`adb shell pidof -s $(_adbb_pkg $1 | head -1)`";adb logcat $logcat_flags; }
+
+function _adbb_con { while [[ "$1" ]]; do adb connect "$1"; shift; done; }
+
+function _adbb_do { [[ ! "$1" ]] && return 1 || command=''
+  while [[ "$1" != 'for' ]]; do command+="$1 "; shift; done; shift
+  while [[ "$1" ]]; do
+    export ANDROID_SERIAL="$1"; parrot cyan "$1"
+    if type "_adbb_${command%% *}" &>/dev/null; then
+      _adbb_$command
+    else
+      adb $command
+    fi
+    shift
+  done
+}
+
+function _adbb_emu {
+  if [[ "$1" ]]; then
+    while [[ "$1" ]]; do
+      secretly "emulator '@${1//'@'/''}'"; shift
+    done
+  else
+    emulator -list-avds
+  fi
+}
+
+function _adbb_fwd { direction='forward' _route $@; }
+
+function _adbb_ip {
+  ipaddr="`adb -d shell ip addr | grep 'state UP' -A2 | tail -n1 | $awk '{print $2}' | cut -f1  -d'/'`"
+  surely sure "connect to $ipaddr:5555"
+  adb tcpip 5555
+  _adbb_con "$ipaddr"
+}
+
+function _adbb_keystrokes { echo "TODO: incomplete"
+  chars="$@"
+  for (( i=0; i < ${#chars}; ++i )); do char="${chars:$i:1}"
+    if [[ "$char" == '<' ]]; then keycode_name='KEYCODE_'
+    elif [[ "$char" == '>' ]]; then keycodes="$keycodes $keycode_name"; keycode_name=''
+    elif [[ "$keycode_name" ]]; then keycode_name+="$char"
+    else
+      if [[ "$char" == ' ' ]]; then keycode='KEYCODE_SPACE'
+      elif [[ "$char" == *$'\n'* ]]; then keycode='KEYCODE_ENTER'
+      else keycode="KEYCODE_$char"; fi
+      keycodes="$keycodes $keycode"
+    fi
+  done
+  adb shell "input keyevent `to uppercase $keycodes`" >/dev/null
+}
+
+function _adbb_ls {
+  if [[ "$1" ]]; then
+    _adbb_ls | grep "${1/@/}" | head -1
+  else
+    adb devices | grep -v '^List of devices\|offline\|^$' | $awk '{print $1}'
+  fi
+}
+
+function _adbb_off { adb shell reboot -p; }
+
+function _adbb_os { adb shell getprop ro.build.version.release; }
+
+function _adbb_pid { adb shell pidof `_adbb_pkg $@`; }
+
+function _adbb_pkg {
+  if [[ "$1" ]]; then local pkgs="`_adbb_pkg`"
+    while [[ "$1" ]]; do
+      echo "$pkgs" | grep -E "$1"; shift
+    done
+  else
+    while read pkg; do
+      echo -e "${pkg//'='/'\n'}" | tail -1
+    done <<< "`adb shell pm list packages -f`"
+  fi
+}
+
+function _adbb_props {
+  if [[ "$1" ]]; then
+    adb shell getprop | grep "$@"
+  else
+    adb shell getprop
+  fi
+}
+
+function _adbb_rebo { adb shell reboot; }
+
+# function _adbb_rec { adb shell screenrecord --bit-rate 6000000 /sdcard/`date +%s`.mp4; }
+
+function _adbb_rev { direction='reverse' _route $@; }
+
+function _adbb_rez { adb kill-server && sleep 1 && adb devices; }
+
+function _adbb_rm {
+  while read package; do echo "uninstall $package"
+    adb uninstall "$package" ||:; shift
+  done <<< "`_adbb_pkg $@`"
+}
+
+function _adbb_scr { scrcpy --shortcut-mod=lctrl > /dev/null 2>&1 & }
+
+function _adbb_sdk { adb shell getprop ro.build.version.sdk; }
+
+function _adbb_sh { adb shell $@; }
+
+function _adbb_start { adb shell am start -n $@; } # eg. com.app/.MainActivity OR com.app/com.app.package.MainActivity
+
+function _adbb_wait { until adb shell echo ready; do sleep ${1:-5}; done; }
+
+# function _adbb_wifi { adb shell svc wifi ${switch:-enable}; }
+
+function _adbb_zzz { adb shell input keyevent 26; }
+
+function check_adb_device { [[ "$ANDROID_SERIAL" ]] || exit 1; }
+
+function _route {
+  if [[ "$1" == 'stop' ]]; then
+    if [[ "$2" ]]; then
+      adb $direction --remove "${proto:-tcp}:$2"
+    else
+      adb $direction --remove-all
+    fi
+  elif [[ "$1" ]]; then
+    [[ "$2" ]] && dest_port="$2" || dest_port="$1"
+    adb $direction "${proto:-tcp}:$1" "${proto:-tcp}:$dest_port"
+  else
+    adb $direction --list
+  fi
+}
+
+if [[ "$1" == '-s' ]]; then
+  export ANDROID_SERIAL="`_adbb_ls $2`"; shift 2
+  check_adb_device
+elif [[ "$1" == '@'* ]]; then
+  export ANDROID_SERIAL="`_adbb_ls $1`"; shift
+  check_adb_device
+fi
+
+if [[ "$1" ]]; then
+  _adbb_$@
+else
+  echo '
+functions:
+all [command]
+cat pkg
+con device1 device2...
+@device command / -s device command
+do [command] for device1 device2...
+emu [emulator_name]
+fwd [port] [host dest] [stop]
+ip
+ls
+off
+os
+pid [pattern]
+pkg [pattern]
+props [pattern]
+rebo
+rev [port] [host dest] [stop]
+rez
+rm [package|pattern]
+sdk
+start [package/activity]
+wait
+zzz
+'
+fi

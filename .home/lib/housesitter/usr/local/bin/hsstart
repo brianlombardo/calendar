@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+if pidof motion &>/dev/null; then
+  echo 'housesitter already armed'; exit
+fi
+
+sudo rm -f /dev/shm/motion.log
+source /etc/default/housesitter
+if [[ "$USE_SYSTEMD" == true ]]; then
+  sudo systemctl unmask motion
+  sudo systemctl enable motion
+  sudo systemctl start motion
+else
+  sudo motion -b -c /etc/motion/motion.conf &>/dev/null
+fi
+
+echo 'housesitter armed'
+if [[ ! -f '/dev/shm/hsquiet' ]]; then
+  /usr/local/bin/hsmessage "ARMED"
+fi

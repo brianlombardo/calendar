@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+if [[ ! -f '/dev/shm/hsquiet' ]]; then
+  /usr/local/bin/hsmessage "snooze..."
+fi

@@ -1,0 +1,22 @@
+[package]
+name = "rusty_playground_server"
+version = "0.0.2"
+edition = "2021"
+
+[dependencies]
+axum = "0.6.16"
+sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "postgres", "macros", "time"] }
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+jsonwebtoken = "8.3.0"
+diesel = { version = "2.0.4", features = ["postgres"] }
+rusty_playground_model = { version = "*", path = "../model" }
+
+
+[dev-dependencies]
+axum-test-helper = "0.2.0"
+
+[[example]]
+name = "listener"
+path = "src/db/listener_sqlx.rs"

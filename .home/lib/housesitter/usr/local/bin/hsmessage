@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+
+source /etc/default/housesitter
+/usr/local/bin/hsslacker "`hostname` $@" "$MESSAGE_WEBHOOK" "$MESSAGE_CHANNEL"

@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -e
+
+function _dpipi {
+  ENGINE_SENSITIVITY="$1"
+
+  if [[ "$3" == '-i' ]]; then shift
+    LABEL='Inches per π: '
+    UNIT='"'
+    if [[ ! "$3" ]]; then
+      read -p "Sensitivity: [$ENGINE_SENSITIVITY] " VAL;
+      VAL="${VAL:-$ENGINE_SENSITIVITY}"
+    else
+      VAL="$3"; shift
+    fi
+  else
+    LABEL='Sensitivity: '
+    if [[ ! "$3" ]]; then
+      read -p 'Inches per π: [10] ' VAL;
+      VAL="${VAL:-10}"
+    else
+      VAL="$3"; shift
+    fi
+  fi
+
+  if [[ ! "$3" ]]; then
+    read -p 'Dots per inch: [400] ' DPI;
+    DPI="${DPI:-400}"
+  else
+    DPI="$3"
+  fi
+  DPI_MULT="`clac 400 / $DPI`"
+  VAL_MULT="`clac 10 x $ENGINE_SENSITIVITY / $VAL`"
+  echo "$LABEL`clac $VAL_MULT x $DPI_MULT`$UNIT"
+}
+
+function _dpitransform {
+  echo '427 PPI
+6 400 DPI
+5 550 DPI
+4 800 DPI
+3 1600 DPI
+2 6400 DPI
+'
+}
+
+if [[ "$1" =~ ^source$|^a?pex$|^cs2?$|^gmod$|^hl2$|^l4d2?$|^portal2?$|^tf2?$ ]]; then _dpipi 2 $@
+elif [[ "$1" =~ ^fortnite$|^fn$|^siege$|^rss$ ]]; then _dpipi 8 $@
+elif [[ "$1" == 'mwf' ]]; then _dpipi 7 $@
+elif [[ "$1" =~ ^overwatch$|^ow$ ]]; then _dpipi 6.77 $@
+elif [[ "$1" == 'realm' ]]; then _dpipi 5.4 $@
+# elif [[ "$1" =~ ^pubg?$ ]]; then _dpipi 47 $@
+elif [[ "$1" =~ ^quake3$|^q3a$ ]]; then _dpipi 2.2 $@
+elif [[ "$1" =~ ^sg$|^splitgate$ ]]; then _dpipi 4.7 $@
+elif [[ "$1" =~ ^val(orant)?$ ]]; then _dpipi 0.635 $@
+elif [[ "$1" =~ ^win(dows)?$ ]]; then _dpitransform
+else echo '
+examples:
+source
+fortnite
+mwf
+overwatch
+quake3
+realm
+siege
+splitgate
+valorant
+windows
+'
+fi

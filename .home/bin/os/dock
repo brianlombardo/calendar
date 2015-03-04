@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -e
+
+op="$1"; shift && docker_root="$@" ||:
+if [[ "$docker_root" ]]; then cd "$docker_root"; fi
+
+if [[ -f 'Dockerfile' ]]; then
+  if [[ "$op" =~ ^b(uild)?$ ]]; then
+    command=`grep '^# docker build' 'Dockerfile' | head -1 | $awk '{$1="";print $0}'`
+  elif [[ "$op" =~ ^r(un)?$ ]]; then
+    command=`grep '^# docker run' 'Dockerfile' | head -1 | $awk '{$1="";print $0}'`
+  fi
+
+  if [[ "$command" ]]; then $command; exit; fi
+fi
+
+echo 'usage:
+dock build /path/to/container/root
+dock run /path/to/container/root
+
+Dockerfile:
+# docker build -t my_container .
+# docker run -p 2222:22 -it my_container
+FROM ubuntu:noble...
+'
