@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ ! -d "$ANDROID_HOME/cmdline-tools" ]]; then
+  tools=commandlinetools-mac-11076708_latest.zip
+  mkdir -p "$ANDROID_HOME"
+  cd "$ANDROID_HOME"
+  wget https://dl.google.com/android/repository/$tools
+  unzip $tools
+  mv cmdline-tools latest
+  mkdir cmdline-tools
+  mv latest cmdline-tools
+fi
+"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --update --verbose --sdk_root="$ANDROID_HOME"

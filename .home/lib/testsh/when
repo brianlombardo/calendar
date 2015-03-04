@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+function when { # command
+  fun="$1"
+  receiver=$fun'_'
+  receiverCommand="$fun"
+  shift
+  "$@"
+}
+
+function receives { # 'arguments'
+  receiver="$fun`_get_handler_name "$1"`"
+  receiverCommand="$fun $1"
+  shift
+  "$@"
+}
+
+function then_echo { # value
+  local input="$@"
+  shift
+  [[ "$1" ]] && _then_echo_next $input ||\
+    _build_receiver "
+        echo '$input'"
+}
+
+function then_return { # code
+  local code='0'
+  [[ "$1" ]] && let code="$1"
+  _build_receiver "return $code"
+}
+
+function then_do { # 'script'
+  [[ "$1" ]] && _build_receiver "
+    $@
+  " || return 1
+}
+
+function _then_echo_next {
+  _build "export values$receiver='$@'"
+
+  _build_receiver "
+      [[ \$values$receiver ]] || return 1
+      echo \$values$receiver | $awk '{ print \$1 }'
+      function pop { shift && echo \$@; }
+      values$receiver=\`pop \$values$receiver\`"
+}
+
+function _build_receiver {
+  [[ "`type -t $fun`" == 'function' ]] || _build "
+    # receiver: $fun
+    function $fun { $fun\`_get_handler_name \"\$@\"\`
+    }; export -f $fun"
+
+  _build "
+    # handler: ${receiverCommand//$'\n'/}
+    function $receiver { $@
+    }; export -f $receiver"
+
+  [[ $targetCount ]] && _build "
+    # error: ${receiverCommand//$'\n'/}
+    function error_$receiver {
+      echo \"call count is \$count_$receiver instead of $targetCount for
+$receiverCommand\"
+    }; export -f error_$receiver"
+
+  funs="$fun $receiver error_$receiver $funs"
+
+  unset fun receiver receiverCommand targetCount
+}
+
+function _build {
+  [[ "$codegen" ]] && echo "$@" >> "$HOME/codegen.sh"
+  eval "$@"
+}
+
+function _get_handler_name {
+  printf '_'
+  local rec="$@"; rec=${rec// /}
+  [[ "$rec" ]] && md5sum <<< "$rec" | $awk '{ print $1 }'
+}; export -f _get_handler_name

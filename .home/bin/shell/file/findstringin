@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+args='-rnw'
+if [[ "$1" == '-v' ]]; then shift; else args+='l'; fi
+grep --color=always "$args" "${2:-.}" -e "$1"

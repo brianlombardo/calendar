@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+value="${@//,/}"
+value="${value//./}"
+value="${value//-/}"
+sed 's/^[0-9]*//'<<<"$value"

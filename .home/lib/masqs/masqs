@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -e
+
+function _masqs_block {
+  local hosts=( $@ 'https://winhelp2002.mvps.org/hosts.txt' )
+  curl -s ${hosts[*]} \
+    | grep '^0\.0\.0\.0' | grep -o '^[^#]*' \
+    | sed -e 's/\r/\n/g' | sort | uniq | grep -v '^$'
+}
+
+function _masqs_fw {
+  if [[ "$1" ]]; then wan="$1"; fi
+  _masqs_guests | while read guest; do
+    if [[ "$guest" != *'.local' ]]; then
+      gawk -F, '{print "-A POSTROUTING -s "$2" -o "$4" -j MASQUERADE"}' <<< "$guest,${wan:-eth0}"
+    fi
+  done | sort -V
+}
+
+function _masqs_hosts {
+  _masqs_guests | while read guest; do
+    gawk -F, '{print tolower($2" "$3".box")}' <<< "$guest"
+  done | sort -V
+}
+
+function _masqs_guests { cat /etc/dnsmasq.d/masqs.guests | grep '^dhcp-host='; }
+
+function _masqs_rez { fw r; serv r dnsmasq; }
+
+if [[ "$1" ]]; then _masqs_$@; else echo 'masqs block, fw, hosts, guests, rez'; fi

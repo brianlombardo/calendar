@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$1" ]]; then
+  while [[ "$1" ]]; do
+    secretly "emulator '@${1//'@'/''}'"; shift
+  done
+else
+  emulator -list-avds
+fi

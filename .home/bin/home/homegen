@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -e
+
+wan || exit 1
+
+homeup="$HOLO/bin/homeup"
+[[ -s "$homeup" ]] && echo 'local home already present.' && exit 1
+
+surely "setup local home in $HOLO"
+
+mkdir -p "$HOLO/bin"
+cd "$HOLO"
+echo '#!/usr/bin/env bash
+set -e
+
+# homesync -x
+cd "$HOLO"
+git count-objects
+git fetch && git diff origin/main --name-status | parrot mag -
+git pull
+git status | grep "nothing to commit" && exit || git add -A
+if [[ "$HOMESQUASH" ]]; then
+  git commit --amend -C HEAD && git push origin main -fu
+else
+  git commit -m"`date`" && git push origin main
+fi
+git gc && git count-objects
+' > "$homeup"
+
+chmod +x "$homeup"
+
+git init -b main
+git commit -m"`date`"
+[[ "$1" ]] && remote="$1" || read -p 'repo: ' remote
+[[ "$remote" ]] && git remote add origin "$remote" && git push origin main -u
+
+# function container { cd "$HOME/.home"
+#   echo "FROM debian:bookworm
+# RUN useradd -ms /usr/bin/zsh $USER
+# RUN mkdir -p /home/$USER/.home && chown -R $USER: /home/$USER
+# COPY . /home/$USER/.home
+# RUN apt-get update && apt-get upgrade -y
+# RUN DEBIAN_FRONTEND=noninteractive apt-get install -y vim git zsh tmux xrdp xfce4 xfce4-terminal
+# WORKDIR /home/$USER
+# USER $USER
+# RUN /home/$USER/.home/init
+# CMD [\"zsh\"]" > Dockerfile
+
+#   if [[ "$1" == 'build' ]]; then shift
+#     docker build -t 'imaginary' .
+#   else
+#     docker run -p3333:3389 -p2222:22 -it 'imaginary'
+#   fi
+# }

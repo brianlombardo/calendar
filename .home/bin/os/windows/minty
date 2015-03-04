@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$1" == 'init' ]]; then echo 'BoldAsFont=-1
+FontHeight=13
+FontSmoothing=full
+CursorType=block
+CursorBlinks=no
+ClipShortcuts=no
+AltFnShortcuts=no
+CtrlShiftShortcuts=yes
+Columns=130
+Rows=40
+FontWeight=700
+FontIsBold=yes
+Font=Consolas
+Transparency=low
+ThemeFile=mintty
+BackgroundColour=14,16,31
+ForegroundColour=122,175,175
+CursorColour=174,201,228
+Black=0,0,0
+BoldBlack=38,38,38
+Red=184,153,122
+BoldRed=220,204,188
+Green=122,184,153
+BoldGreen=188,220,204
+Yellow=153,184,122
+BoldYellow=204,220,188
+Blue=153,122,184
+BoldBlue=204,188,220
+Magenta=184,122,153
+BoldMagenta=220,188,204
+Cyan=122,153,184
+BoldCyan=188,204,220
+White=217,217,217
+BoldWhite=255,255,255
+OpaqueWhenFocused=no
+Scrollbar=none
+BellType=0
+BellTaskbar=no' > $HOME/.minttyrc
+else
+  secretly "mintty -- $@"
+fi

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set  -e
+
+ip_command="${ipcmd:-ip a}"
+if [[ "$1" =~ ^n$|^arp$|^neighbor$ ]]; then
+  if type ip &>/dev/null; then ip n | sudo nslookup; fi
+  if type arp &>/dev/null; then sudo arp -a; fi
+else
+  if [[ "$1" == 'a' ]]; then shift; fi
+  $ip_command | grep "${@:-.*}"
+fi
