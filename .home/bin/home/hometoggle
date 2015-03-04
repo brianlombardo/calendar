@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+cd "$HOME"
+quietly 'mv .git.home .git || mv .git .git.home'
+happily 'git remote -v && git status' || echo 'repo disabled.'

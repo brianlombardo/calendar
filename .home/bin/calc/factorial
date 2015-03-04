@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+function factorial {
+  (( 1 > $1 )) && echo 1 || echo $(( $1 * $( factorial $(( $1 - 1 )) ) ))
+}
+
+factorial $1

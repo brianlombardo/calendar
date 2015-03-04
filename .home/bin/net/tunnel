@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$1" ]]; then host="$1"; shift; fi
+
+if [[ "$1" ]]; then remoteport="$1"; shift;
+else echo 'no port(s) specified.'; exit; fi
+
+if [[ "$1" ]]; then localport="$1"; shift; 
+else localport="$remoteport"; fi
+
+ssh -L "$localport:$host:$remoteport" "$host" $@

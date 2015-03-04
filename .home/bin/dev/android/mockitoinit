@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+cd ./test
+mkdir -p ./resources/mockito-extensions
+echo 'mock-maker-inline' > ./resources/mockito-extensions/org.mockito.plugins.MockMaker

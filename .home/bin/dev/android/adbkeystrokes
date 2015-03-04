@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -e
+chars="$@"
+
+for (( i=0; i < ${#chars}; ++i )); do
+  char="${chars:$i:1}"
+  
+  if [[ "$char" =~ ^'{'$|^'<'$|^'('$ ]]; then keycode_name='KEYCODE_'
+  elif [[ "$char" =~ ^'}'$|^'>'$|^')'$ ]]; then keycodes="$keycodes $keycode_name"; keycode_name=''
+  elif [[ "$keycode_name" ]]; then keycode_name+="$char"
+  else
+    if [[ "$char" == ' ' ]]; then keycode='KEYCODE_SPACE'
+    elif [[ "$char" == *$'\n'* ]]; then keycode='KEYCODE_ENTER'
+    else keycode="KEYCODE_$char"; fi
+    keycodes="$keycodes $keycode"
+  fi
+done
+
+adb shell "input keyevent `to uppercase $keycodes`" >/dev/null

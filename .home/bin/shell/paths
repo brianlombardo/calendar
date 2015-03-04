@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+paths="`echo -e "${PATH//:/'\n'}"`"
+echo "$paths"
+paths=${paths//' '/'\ '}
+result="`each line 'cautiously ls' $paths 2>&1`"
+if [[ "$result" ]]; then 
+  echo "$result"
+else
+  echo 'all paths are valid.'
+fi

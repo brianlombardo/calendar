@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+sudo diskutil apfs encryptvolume "$1" -user disk

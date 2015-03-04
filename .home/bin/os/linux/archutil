@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+set -e
+
+[[ ! "$1" ]] && echo '
+functions:
+
+install
+installscript
+makeiso
+disks
+wifi $ssid $passphrase
+
+variables:
+
+archdisk=/dev/sda
+archhost=tranquilo
+archpackages=package_names
+archservices=dhcpcd
+archuser=kernel
+cryptroot=new_encrypted_volume_name
+desktop=xfce4
+ifwlan=wlan0
+' && exit
+
+
+[[ ! "$archdisk" ]] && archdisk='/dev/sda'
+[[ ! "$archuser" ]] && archuser='kernel'
+[[ ! "$archhost" ]] && archhost='tranquilo'
+[[ ! "$ifwlan" ]] && ifwlan='wlan0'
+archservices="dhcpcd $archservices"
+
+efipart="$archdisk"'1'
+rootpart="$archdisk"'2'
+
+
+function install {
+    lsblk $archdisk | grep disk || return 1
+
+    timedatectl set-ntp true
+    ls /sys/firmware/efi/efivars
+    ping -c1 archlinux.org
+    echo 'Server = https://mirrors.kernel.org/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+
+    read -p "wipe $archdisk?"
+    parted "$archdisk" mklabel gpt
+    parted "$archdisk" mkpart ESP fat32 1M 513M
+    parted "$archdisk" set 1 boot on
+    parted "$archdisk" mkpart primary ext4 513M 100%
+    mkfs.vfat -F32 "$efipart"
+
+    if [[ "$cryptroot" ]]; then
+        cryptsetup --verbose \
+            --cipher aes-xts-plain64 \
+            --key-size 512 \
+            --hash sha512 \
+            --iter-time 5000 \
+            --use-random \
+            luksFormat "$rootpart"
+
+        cryptsetup open --type luks "$rootpart" "$cryptroot"
+        rootfs="/dev/mapper/$cryptroot"
+    else
+        rootfs="$rootpart"
+    fi
+    mkfs.ext4 "$rootfs"
+    mount -o discard -t ext4 "$rootfs" /mnt
+    mkdir /mnt/boot
+    mount "$efipart" /mnt/boot
+
+    read -p "pacstrap $rootpart?"
+    pacstrap -K /mnt base linux linux-firmware
+    genfstab -U /mnt >> /mnt/etc/fstab
+    
+    # installscript > /mnt/install.sh
+    # chmod +x /mnt/install.sh
+    # arch-chroot /mnt /install.sh && echo 'success!' || echo 'fail?'
+    # rm /mnt/install.sh
+    arch-chroot /mnt /bin/bash -c "`installscript`" && echo 'success!' || echo 'fail?'
+}
+
+function installscript {
+    if [[ "$desktop" ]]; then
+        archpackages="$desktop xorg xorg-server gnome pulseaudio pulseaudio-alsa nm-connection-editor network-manager-applet firefox chromium gimp blender gnome-tweak-tool code dconf-editor $archpackages"
+        archservices="NetworkManager.service gdm ${archservices//'dhcpcd'/}"
+    fi
+
+    if [[ "$cryptroot" ]]; then
+        boot_options_root="cryptdevice=$rootpart:$cryptroot:allow-discards root=/dev/mapper/$cryptroot" 
+    else
+        boot_options_root="root=$rootpart"
+    fi
+
+    echo "#!/usr/bin/env bash
+set -e
+
+echo LANG=en_US.UTF-8 > /etc/locale.conf
+echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen
+
+echo '$archhost' > /etc/hostname
+
+echo '127.0.0.1 localhost
+127.0.1.1 arch' > /etc/hosts
+
+echo '[options]
+HoldPkg = pacman glibc
+Architecture = auto
+CheckSpace
+SigLevel = Required DatabaseOptional
+LocalFileSigLevel = Optional
+[core]
+Include = /etc/pacman.d/mirrorlist
+[extra]
+Include = /etc/pacman.d/mirrorlist
+[community]
+Include = /etc/pacman.d/mirrorlist
+[multilib]
+Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
+
+echo 'MODULES=()
+BINARIES=()
+FILES=()
+HOOKS=(base udev autodetect modconf block filesystems keyboard fsck encrypt)' > /etc/mkinitcpio.conf
+
+echo 'title Arch Linux
+linux /vmlinuz-linux
+initrd /intel-ucode.img
+initrd /initramfs-linux.img
+options $boot_options_root rw acpi_mask_gpe=0x06' > /boot/loader/entries/arch.conf
+
+echo 'default arch
+timeout 10
+editor 0' > /boot/loader/loader.conf
+
+
+ln -sf /usr/share/zoneinfo/America/Chicago /etc/localtime
+locale-gen
+
+pacman -Syy vim git openssh zsh tmux sudo bash-completion base-devel dhcpcd ufw lm_sensors dosfstools intel-ucode $archpackages
+
+echo '
+set root password...
+'
+passwd root
+
+mkdir -p /etc/sudoers.d
+echo '$archuser ALL=NOPASSWD:ALL' > /etc/sudoers.d/$archuser
+useradd -m -g users -G wheel -s /usr/bin/zsh $archuser
+
+echo '
+set $archuser password...
+'
+passwd $archuser
+
+mkinitcpio -p linux
+
+bootctl --path=/boot install
+
+systemctl enable sshd $archservices
+
+"
+}
+
+function font { setfont $@; }
+
+function hidpi { font sun12x22; }
+
+function efistub {
+    [[ "$cryptroot" ]] && boot_options_root='cryptdevice=/dev/sda2:cryptroot:allow-discards root=/dev/mapper/cryptroot' ||\
+                          boot_options_root='root=/dev/sda2'
+    echo "fs0:\vmlinuz-linux $boot_options_root rw initrd=\initramfs-linux.img" > /mnt/boot/startup.nsh
+}
+
+function wifi {
+    local ssid="$1"
+    local passphrase="$2"
+    iwconfig
+    ip link set "$ifwlan" up
+    iwctl device "$ifwlan" show
+    iwctl --passphrase "$passphrase" station "$ifwlan" connect "$ssid"
+}
+
+function makeiso {
+    local dirname="`dirname "$0"`"
+    cd "`realpath $dirname`"
+    mkisofs -allow-limited-size -o "$HOME/archutil.iso" ./archutil
+}
+
+$@

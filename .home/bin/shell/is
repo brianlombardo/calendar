@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -e
+
+function _any { target="$1"; shift
+  while [[ "$1" ]]; do
+    if [[ "$1" == "$target" ]]; then return; fi
+    shift
+  done
+  return 1
+}
+
+function _same { target="$1"; shift
+  while [[ "$1" ]]; do
+    if [[ "$1" != "$target" ]]; then return 1; fi
+    shift
+  done
+}
+
+function _empty { [[ ! "$1" ]]; }
+
+function _equal {
+  export target="`value $1`"; shift
+  equal_value () { clac "$target == `value $1`"; }
+  export -f equal_value
+  each exec "equal_value" $@
+}
+
+function _even {
+  even_value () { is_int $1 && is_zero $(( $1 % 2 )); }
+  export -f even_value
+  each exec even_value $@
+}
+
+function _odd {
+  odd_value () { is_int $1 && ! is_zero $(( $1 % 2 )); }
+  export -f odd_value
+  each exec odd_value $@
+}
+
+function _int { each exec is_int $@; }
+
+function _zero { each exec is_zero $@; }
+
+function _negative {
+  neg () { _less $1 0; }; export -f neg
+  each exec neg $@
+}
+
+function _positive {
+  pos () { is_zero $1 || _greater $1 0; }; export -f pos
+  each exec pos $@
+}
+
+function _greater { clac "`value $2` < `value $1`"; }
+
+function _less { clac "`value $1` < `value $2`"; }
+
+function _dir { [[ -d "$@" ]]; }
+
+function _file { [[ -f "$@" ]]; }
+
+function _binary { [[ -f "$@" ]] && quietly "! grep -qI . '$@'"; }
+
+function is_int { [[ "$1" =~ ^-?[0-9]+$ ]]; }
+
+function is_zero { (( ${1/./} == 0 )); }
+
+export -f _any _same _equal _even _odd _int is_int _zero _negative _positive _greater _less _empty is_zero
+
+_$@
