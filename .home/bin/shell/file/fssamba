@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+echo "# /etc/samba/smb.conf
+[home]
+    comment = home
+    path = $HOME
+    browsable = yes
+    guest ok = no
+    read only = no
+    create mask = 0755 
+
+# smbpasswd -a $USER
+
+# sudo service smbd restart
+# sudo service nmbd restart"

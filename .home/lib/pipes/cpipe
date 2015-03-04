@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+///usr/bin/env true; exec blobman c "$0" $@
+#include <stdio.h>
+
+int main(int argc, char **argv) {
+  int i;
+  char pipe[65536];
+
+  for(i = 0; (*(pipe + i) = getchar()) != -1; ++i);
+  *(pipe + i - 1) = '\0';
+  fprintf(stdout, "%s\n", pipe);
+
+  for (i = 1; i < argc; ++i) {
+    printf("%s\n", *(argv + i));
+  }
+
+  return 0;
+}

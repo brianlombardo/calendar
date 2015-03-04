@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+if [[ "$1" ]]; then query="$@"
+  url_path="search/search_results.aspx?Ntt=${query// /+}"
+fi
+open "https://www.microcenter.com/$url_path"

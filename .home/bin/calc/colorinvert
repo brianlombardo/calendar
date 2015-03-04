@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+color=${1#"#"}
+r=`printf "%d" 0x${color:0:2}` g=`printf "%d" 0x${color:2:2}` b=`printf "%d" 0x${color:4:2}`
+echo "`printf "%02X" $((255 - r))``printf "%02X" $((255 - g))``printf "%02X" $((255 - b))`"

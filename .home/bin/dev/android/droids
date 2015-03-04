@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+function format {
+  local text="$@" ansi_color="`ansicode bright,$PROMPT_COLOR`"
+  text="${text//'-'/"\e[0;${ansi_color}-\e[0;67m"}"
+  text="${text//'+'/"\e[0;${ansi_color}+\e[0;67m"}"
+  text="${text//'|'/"\e[0;${ansi_color}|\e[0;67m"}"
+  text="${text//'◄'/"\e[0;${ansi_color}◄\e[0;67m"}"
+  text="${text//'▼'/"\e[0;${ansi_color}▼\e[0;67m"}"
+  text="${text//'►'/"\e[0;${ansi_color}►\e[0;67m"}"
+  text="${text//'▲'/"\e[0;${ansi_color}▲\e[0;67m"}"
+  echo -e "$text"
+}
+
+if [[ "$1" =~ ^f(rag)?(ment)?$ ]]; then
+  format '
+ start                                         stop
+   |                                            |
+onAttach()---+                               onDetach()◄------+
+   |         |                                  |             |
+onCreate()   |                               onDestroy()      |
+   |         ▼                                  |             |
+onCreateView()◄----------------------------- onDestroyView()--+
+   |                                            |
+onActivityCreated()                             |
+   |                                            |
+onStart()◄-----------------------------------onStop()
+   |                                            |
+onResume()----------------run---------------►onPause()
+'
+elif [[ "$1" =~ ^a(ct)?(ivity)?$ ]]; then
+  format '
+                     start
+     user nav          |
++-------------------►onCreate()
+|                      |
+|                    onStart()◄---------------onRestart()
+|                      |                          ▲
+|                    onResume()◄---------------+  |
+|                      |                       |  |
+kill proc             run                      |  |
+|                      |        user app nav   |  |
+os mem req-----------onPause()-----------------+  |
+|                      |                          | user nav
++--------------------onStop()---------------------+
+                       |
+                     onDestroy()
+                       |
+                      stop
+'
+else
+  while read line; do echo -e "      $line"
+  done <<< "`asciis android $PROMPT_COLOR`"
+  parrot "bright,$PROMPT_COLOR" '  OS\tSDK\tName\t\t\tJDK'
+  echo -e '  15\t35\tVanillaIceCream
+  14\t34\tUpsideDownCake\t\t17
+  13\t33\tTiramisu\t\t11
+  12\t31-32\tSnowCone\t\t11
+  11\t30\tRedVelvetCake
+  10\t29\tQuinceTart
+   9\t28\tPie
+   8\t26-27\tOreo
+   7\t24-25\tNougat
+   6\t23\tMarshmallow
+   5\t21-22\tLollipop
+   4\t14-20\tICS JellyBean KitKat
+   3\t11-13\tHoneycomb
+   2\t5-10\tEclair Froyo Gingerbread
+   1\t1-4\tPetitFour Donut Cupcake
+  '
+fi

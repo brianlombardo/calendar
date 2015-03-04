@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -e
+
+lang="$1" source_file="$2"
+
+if ! [[ "$source_file" && -f "$source_file" ]]; then
+  echo invalid source. $source_file $lang; exit 1
+fi
+
+shift 2
+recipe='' extension='' launcher='' pipe_source=''
+blob_name="$BLOBS/`basename $source_file`"
+blob="$blob_name.`md5sum "$source_file" | $awk '{print $1}'`"
+
+if [[ "$lang" == 'c' ]]; then
+  recipe="gcc -xc --std=c99 -o $blob" pipe_source=true
+elif [[ "$lang" == 'c++' ]]; then
+  recipe="g++ -xc++ -std=gnu++17 -o $blob" pipe_source=true
+elif [[ "$lang" == 'golang' ]]; then
+  recipe="gccgo $source_file -o $blob"
+elif [[ "$lang" == 'kotlin' ]]; then
+  extension='.jar'; blob+="$extension" launcher='java -jar'
+  recipe="kotlinc $source_file -include-runtime -d $blob"
+elif [[ "$lang" == 'kotlin-native' ]]; then
+  extension='.kexe'; blob+="$extension"
+  recipe="kotlinc-native $source_file -o $blob"
+elif [[ "$lang" == 'objc' ]]; then
+  gsconf=`gnustep-config --objc-flags && gnustep-config --base-libs`
+  recipe="gcc $source_file -xobjective-c $gsconf -o $blob"
+elif [[ "$lang" == 'rust' ]]; then
+  recipe="rustc $source_file -o $blob"
+elif [[ "$lang" == 'zig' ]]; then
+  recipe="zig build-exe $source_file -femit-bin=$blob"
+else
+  echo "$lang blob recipe not found :-("; exit
+fi
+
+if [[ ! -f "$blob" ]]; then
+  rm -f "$blob_name"*"$extension"
+  if [[ "$pipe_source" == true ]]; then
+    tail -c +20 "$source_file" | $recipe -
+  else
+    $recipe
+  fi
+  chmod +x "$blob"
+fi
+
+[[ "$build_blob" ]] || exec $launcher "$blob" $@

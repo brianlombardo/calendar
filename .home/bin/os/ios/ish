@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -e
+
+function _ish_mount {
+  local mnt="$HOME/.mnt/${1:-`rando`}"
+  mkdir -p "$mnt" && mount -t ios . "$mnt"
+}
+
+function _ish_location { cat '/dev/location'; }
+
+function _ish_timezone {
+  timezone="${1:-America/Chicago}"
+  apk add tzdata
+  ls /usr/share/zoneinfo
+  cp /usr/share/zoneinfo/$timezone /etc/localtime
+  echo "$timezone" >  /etc/timezone
+  apk del tzdata
+}
+
+_ish_$@

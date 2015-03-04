@@ -1,0 +1,2 @@
+echo 'softwareupdate --fetch-full-installer --full-installer-version 15.3.1'
+echo "sudo '${1:-/Applications/Install macOS Sequoia.app}/Contents/Resources/createinstallmedia' --volume '${2:-/Volumes/TARGET}'"

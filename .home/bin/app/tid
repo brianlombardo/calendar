@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+baseUrl='https://listen.tidal.com'
+if [[ "$1" ]]; then search="search?q=$@"; fi
+open "$baseUrl/$search"

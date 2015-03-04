@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+
+function _integer {
+  integer_value () { $awk '{print int($1)}' <<< "$1"; }
+  export -f integer_value
+  each map integer_value $@
+}
+
+function _lowercase { $awk '{print tolower($0)}' <<< "$@"; }
+
+function _uppercase { $awk '{print toupper($0)}' <<< "$@"; }
+
+_$@

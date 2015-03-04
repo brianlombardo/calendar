@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+key=`gpg-key-list | head -n3 | $awk '{print $2}'`
+key=${key/rsa*\//}
+echo "$key" | xargs
