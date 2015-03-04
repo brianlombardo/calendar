@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -e
+
+if ! (type motion && type curl && type screen) &>/dev/null; then
+  pkg i motion curl screen -y
+fi
+
+if [[ ! -f '/etc/motion/motion.conf.original' ]]; then
+  sudo mv /etc/motion/motion.conf /etc/motion/motion.conf.original
+fi
+sudo cp -vr "$DOTHOME/lib/housesitter/etc/motion" /etc
+
+if ! [[ -f '/etc/default/housesitter' ]]; then
+  sudo cp -v "$DOTHOME/lib/housesitter/etc/default/housesitter" /etc/default
+fi
+sudo cp -vr "$DOTHOME/lib/housesitter/usr/local" /usr
+
+if ! type dbu &>/dev/null; then
+  cd
+  git clone https://github.com/andreafabrizi/dropbox-uploader dbu
+  sudo mv ./dbu/dropbox_uploader.sh /usr/local/bin/dbu
+  rm -fr ./dbu
+fi

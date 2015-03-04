@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+grep="$@"
+if [[ "$grep" ]]; then 
+  grep="${grep//' '/'\|'}\|ProcessName\|\-\-\-\-"
+else
+  grep='.*'
+fi
+
+powershell Get-Process | grep -i "$grep"

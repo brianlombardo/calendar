@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ ! "$JIRA_ORG" ]]; then echo 'JIRA_ORG not set.'; exit; fi
+
+jira_baseurl="https://$JIRA_ORG.atlassian.net"
+jira_project="$JIRA_PROJ_DEFAULT"
+
+if [[ "$1" =~ ^plan$|^p$ ]]; then shift
+  while [[ "$1" ]]; do item="$1" item="${item//,/}"; shift
+    open "$jira_baseurl/jira/plans/$item"
+  done
+elif [[ "$1" =~ ^board$|^b$ ]]; then shift
+  while [[ "$1" ]]; do item="$1" item="${item//,/}"; shift
+    jira_board="`echo -e "${JIRA_BOARDS//, /'\n'}" | grep -i "^$item [[:digit:]]" | head -1 | $awk '{print $2}'`"
+    if [[ "$jira_board" ]]; then
+      jira_project="`$awk '{print toupper($1)}' <<< "$item"`"
+      open "$jira_baseurl/jira/software/c/projects/$jira_project/boards/$jira_board"
+    fi
+  done
+elif [[ "$1" ]]; then
+  while [[ "$1" ]]; do item="$1" item="${item//,/}"; shift
+    if [[ "$item" =~ .*-.* ]]; then
+      open "$jira_baseurl/browse/$item"
+    elif is int "$item"; then
+      open "$jira_baseurl/browse/${jira_project}-${item}"
+    else
+      jira_project="$item"
+    fi
+  done
+else
+  open "$jira_baseurl"
+fi

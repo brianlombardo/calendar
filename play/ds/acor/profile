@@ -1,0 +1,3 @@
+export gameid='302550'
+export skip='true'
+export serveCommand='./acServer'

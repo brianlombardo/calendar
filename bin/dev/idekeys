@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$whereami" == 'darwin' ]]; then
+  cd "$HOME/Library/Application Support/"
+else
+  cd "$HOME/.config"
+fi
+
+function _get_sha { sha256sum "$@" | $awk '{print $1}'; }
+
+base_keymap_file="$DOTHOME/conf/idea/trnqilo.xml"
+base_keymap_file_sha="`_get_sha "$base_keymap_file"`"
+
+keymap_files="`findfilein keymaps/trnqilo.xml "JetBrains" 2> /dev/null ||:`
+`findfilein keymaps/trnqilo.xml "Google" 2> /dev/null ||:`"
+
+function _keymap_find { echo "$keymap_files" | grep 'keymaps/trnqilo'; }
+
+function _keymap_apply {
+  if _keymap_find | grep -q 'trnqilo'; then
+    while read keymap_file; do
+      if [[ "`_get_sha "$keymap_file"`" != "$base_keymap_file_sha" ]]; then
+        cp -v $base_keymap_file $keymap_file | parrot yellow -
+      else
+        parrot green "$keymap_file"
+      fi
+    done <<< "`echo "$keymap_files" | grep -v '^$'`"
+  fi
+}
+
+function _keymap_changed {
+  changed_keymap_files=''
+
+  while IFS=$'\n' read -r keymap_file; do
+    keymap_file_sha="`_get_sha "$keymap_file"`"
+    if [[ "$base_keymap_file_sha" != "$keymap_file_sha" ]]; then
+      changed_keymap_files+="$keymap_file\n"
+    fi
+  done <<< "`_keymap_find`"
+
+  if [[ "$changed_keymap_files" ]]; then
+    echo -e "$changed_keymap_files" | grep -v '^$'
+  else echo 'all keymaps match.'; fi
+}
+
+function _keymap_diff {
+  while IFS=$'\n' read -r keymap_file; do
+    parrot yellow "$keymap_file"
+    diff "$base_keymap_file" "$keymap_file" ||:
+  done <<< "`_keymap_find`"
+}
+
+if [[ "$1" ]]; then _keymap_$@
+else _keymap_find; fi

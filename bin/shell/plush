@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# trap trapc INT && trapc() { :&clear& }
+until false; do
+  read -rep "${PROMPT_ICON:-++} " input
+  $@ $input
+done

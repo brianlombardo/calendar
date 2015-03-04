@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -e
+
+export BLOBS="${BLOBS:-$HOME/.local/blobs}"
+mkdir -p "$BLOBS"
+
+if [[ ! "$1" ]]; then exit
+elif [[ "$1" == 'clean' ]]; then shift
+  if [[ "$1" == 'all' ]]; then rm -fvr "$BLOBS"
+  else
+    function clean_blobs {
+      while [[ "$1" ]]; do rm -fv "$BLOBS/$1"*; shift; done
+    }
+    clean_blobs $@
+  fi
+elif [[ "$1" == 'build' ]]; then shift
+  function each_blob {
+    while [[ "$1" ]]; do
+      $1 && echo "blobbed '`ls "$BLOBS/$1"*`'" &
+      shift
+    done; wait
+  }
+  build_blob=true each_blob $@
+else
+  exec blobber $@
+fi
