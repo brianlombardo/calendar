@@ -1,0 +1,12 @@
+[package]
+name = "cpp_shed"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+
+[dependencies]
+cpp = "0.5.8"
+
+[build-dependencies]
+cpp_build = "0.5.8"

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+[[ "$1" ]] && archive="$1" && tar -czvf "$archive.tar.gz" "$archive"
+[[ "$2" ]] && checksummer="$2" || exit
+
+if [[ "$checksummer" == 'sha'* || "$checksummer" == 'md'* ]]; then
+  [[ "$checksummer" == 'sha' ]] && checksummer+='256sum' || checksummer+='sum'
+  checksum="`$checksummer "$archive.tar.gz" | $awk '{print $1}'`"
+  archive_name="`basename "$archive.tar.gz"`"
+  echo \
+    "$checksummer './$archive_name' | grep -q '$checksum' && echo '$archive_name checks out' || echo '$archive_name is corrupt'" \
+    > "$archive.validate.sh" \
+    && chmod +x "$archive.validate.sh"
+fi

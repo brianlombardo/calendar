@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+sleep ${1:-0}
+
+if [[ "$whereami" == 'darwin' ]]; then
+  osascript -e 'tell app "loginwindow" to «event aevtrsdn»'
+elif [[ "$whereami" == 'linux' ]]; then
+  sudo shutdown -h now
+elif [[ "$whereami" == *'bsd' ]]; then
+  sudo shutdown -p now
+elif [[ "$whereami" == 'windows' ]]; then
+  shutdown -p
+else
+  sudo reboot -p
+fi

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if surely "wipe all containers and images"; then
+  ! quietly docker info && echo 'docker not available.' \
+    && exit 1 ||:
+  docker stop `docker ps -a -q`
+  docker rm `docker ps -a -q`
+  docker rmi -f `docker images -a -q`
+  docker system prune -af
+fi

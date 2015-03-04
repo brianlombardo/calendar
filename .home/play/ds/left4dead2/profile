@@ -1,0 +1,4 @@
+export gameid='222860'
+export map='c1m1_hotel'
+export port='27019'
+export serverArgs='+maxplayers 8 +exec server.cfg'

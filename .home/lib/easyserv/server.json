@@ -1,0 +1,46 @@
+{
+  "port": 8082,
+  "root": "/v1",
+  "apis": [
+    {
+      "method": "get",
+      "route": "/search/:param",
+      "response": {
+        "description": "any string or JSON object"
+      }
+    },
+    {
+      "method": "put",
+      "route": "/add/:item",
+      "status": 201
+    },
+    {
+      "method": "post",
+      "route": "/update/:item"
+    },
+    {
+      "method": "delete",
+      "route": "/delete/:item"
+    },
+    {
+      "method": "patch",
+      "route": "/denied",
+      "status": 401
+    },
+    {
+      "method": "get",
+      "route": "/hello",
+      "response": "<html><body><h1>hello!</h1></body></html>",
+      "eval": "console.log('hello eval!')"
+    },
+    {
+      "method": "get",
+      "route": "/exit",
+      "shell": "killall node"
+    },
+    {
+      "route": "/import",
+      "import": "imported.js"
+    }
+  ]
+}

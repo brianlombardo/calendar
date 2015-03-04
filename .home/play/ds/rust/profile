@@ -1,0 +1,3 @@
+export gameid='258550'
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gamehome/RustDedicated_Data/Plugins/x86_64"
+export serveCommand='./runds.sh +server.identity "tranquilo" +server.port 28015'

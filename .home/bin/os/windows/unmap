@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+
+powsh "net use $1: /delete"

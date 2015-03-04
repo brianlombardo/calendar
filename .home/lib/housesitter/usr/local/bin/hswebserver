@@ -1,0 +1,90 @@
+#!/bin/node
+
+const express = require('express');
+const app = express();
+const header = '<html><head><style>html{background:#000;}a{color:#ccc;}span{color:#888}a:hover{color:#fff}body{padding:4em;font-size:4em;text-align:center;background:#000;color:#bbb;font-family:"Courier New", Courier, monospace}</style></head><body>'
+const button = '<br /><a href="/action" class="button"><h1>toggle</h1></a>';
+const message = '<span class="button"><h1>ok, brb</h1></span>';
+const footer = '</body></html>'
+const script = `
+<script>
+window.onload = function() {
+    window.location.replace("/toggle");
+}
+</script>
+`
+
+const sys = require('util')
+const exec = require('child_process').exec;
+let lock = false;
+
+function getPage(body) {
+  return `${header}${body}${footer}`;
+}
+
+function processCommandResult(stdout, stderr, res) {
+  if (stdout) {
+    console.log(stdout);
+    const body = stdout.includes('running') ? stdout.includes('quietly') ? 'quietly armed!' : 'armed!': 'sleeping.';
+    res.send(getPage(`${body}${button}`));
+  } else {
+    const err = `ERROR: ${stderr}`;
+    console.log(err);
+    res.send(getPage(`${err}${button}`));
+  }
+}
+
+app.get('/', function (req, res) {
+  function onCommandComplete(error, stdout, stderr) {
+    processCommandResult(stdout, stderr, res);
+  }
+  exec("hsstat", onCommandComplete);
+});
+
+
+app.get('/toggle', function (req, res) {
+  if (!lock) {
+    lock = true;
+    function onCommandComplete(error, stdout, stderr) {
+      lock = false;
+      res.redirect('/');
+    }
+    exec("hstoggle", onCommandComplete);
+  } else {
+    console.log('more than one toggle request, ignoring');
+  }
+});
+
+app.get('/stop', function (req, res) {
+  if (!lock) {
+    lock = true;
+    function onCommandComplete(error, stdout, stderr) {
+      lock = false;
+      res.redirect('/');
+    }
+    exec("hsstop", onCommandComplete);
+  } else {
+    console.log('more than one stop request, ignoring');
+  }
+});
+
+app.get('/quiet', function (req, res) {
+  if (!lock) {
+    lock = true;
+    function onCommandComplete(error, stdout, stderr) {
+      lock = false;
+      res.redirect('/');
+    }
+    exec("hsquiet", onCommandComplete);
+  } else {
+    console.log('more than one quiet request, ignoring');
+  }
+});
+
+app.get('/action', function (req, res) {
+  res.send(`${getPage(message)}${script}`);
+});
+
+app.listen(3000, function () {
+  console.log('listening on port 3000');
+});

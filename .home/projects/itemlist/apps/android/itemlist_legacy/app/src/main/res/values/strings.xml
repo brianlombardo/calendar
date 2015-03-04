@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ItemList</string>
+    <string name="button_text">add item</string>
+    <string name="input_hint">enter item name</string>
+</resources>

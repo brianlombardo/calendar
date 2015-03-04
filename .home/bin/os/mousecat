@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+device="/dev/input/${device:-mouse0}"
+if [[ "$1" == 'do' ]]; then shift
+  while sudo cat "$device" | read -n1 value; do $@ $value; done
+elif [[ "$1" == 'hex' ]] || ! type python3 &>/dev/null; then
+  sudo xxd "$device"
+else
+  sudo python3 <<< "import struct,sys
+while True:
+  coord=struct.unpack('3b',open('$device','rb').read(3))
+  print(f'{coord[0]} {coord[1]} {coord[2]}')
+  sys.stdout.flush()
+" 2>/dev/null # keys:  ('4IHHI',open('$device','rb').read(24))
+fi

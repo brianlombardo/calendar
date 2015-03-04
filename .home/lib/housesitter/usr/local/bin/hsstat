@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if pidof motion &>/dev/null; then
+  [[ -f '/dev/shm/hsquiet' ]] && quiet=" quietly" ||:
+  echo "housesitter armed$quiet"
+else
+  echo "housesitter sleeping"
+fi

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+freq=`sysctl hw.cpufrequency`
+[[ "$freq" ]] && freq=`echo $freq | $awk '{print $2}'` && freq=`clac $freq/1000000000` && echo $freq GHz
+[[ "$1" ]] && sudo pmset -a lowpowermode "$1"
+
+[[ "`pmset -g | grep 'lowpowermode' | $awk '{print $2}'`" == '1' ]] &&\
+    echo 'Low power' ||\
+    echo 'Performance'

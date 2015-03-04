@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -e
+
+[[ " $@ " == *' clean '* ]] && blobman clean all
+[[ " $@ " == *' build '* ]] && blobman build cpipe cpppipe knpipe.kt kpipe.kt objcpipe.m rustypipe
+
+i=0
+[[ "$loops" ]] || loops=1
+expected='hello c, c++, dart, golang, groovy, java, kotlin, kotlin-native, kotlin-script, lua, node, objective-c, php, python, ruby, rust, and swift!'
+
+echo -e "expected:\n$expected\n\nactual:"
+
+while (( i < loops )); do let ++i
+  duration="`date +%s%N`"
+  result=`echo 'hello' \
+      | cpipe 'c,' \
+      | cpppipe 'c++,' \
+      | dartpipe 'dart,' \
+      | gopipe.go 'golang,' \
+      | groovypipe 'groovy,' \
+      | javapipe 'java,' \
+      | kpipe.kt 'kotlin,' \
+      | knpipe.kt 'kotlin-native,' \
+      | kpipe.kts 'kotlin-script,' \
+      | luapipe 'lua,' \
+      | nodepipe 'node,' \
+      | objcpipe.m 'objective-c,' \
+      | phppipe 'php,' \
+      | pypipe 'python,' \
+      | rubypipe 'ruby,' \
+      | rustypipe 'rust,' \
+      | swiftpipe 'and swift!'`
+  duration="$(( (`date +%s%N` - duration)/1000000 )) ms"
+  result="`echo $result`"
+  [[ "$result" == "$expected" ]] && message="✓ passed ($duration)" || message="× failed ($duration)"
+  echo -e "$result\n$message\n"
+done

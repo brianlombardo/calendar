@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -e
+
+cd "$DS_HOME"
+
+game="$1"; shift
+gamehome="$DS_HOME/$game"
+export platform="$whereami"
+cd "$gamehome"
+source 'profile'
+
+if [[ ! "$skip" && ! "$gameid" ]]; then
+  echo 'gameid is not set.'
+  exit 1
+elif [[ ! "$skip" ]]; then
+  gamepath="`realpath $gamehome`"
+  [[ "$platform" == 'windows' ]] && gamepath="`cygpath --windows $gamepath`"
+
+  steamcmd \
+    +@ShutdownOnFailedCommand 1 \
+    +@NoPromptForPassword 1 \
+    +@sSteamCmdForcePlatformType $platform \
+    +force_install_dir $gamepath \
+    +login anonymous \
+    +app_update $gameid $validate \
+    +quit
+fi
+
+if [[ "$serveCommand" ]]; then 
+  serveCommand="$serveCommand $@"
+else
+  [[ "$1" ]] && map="$1" && shift
+  [[ "$platform" == 'windows' ]] && serveCommand='srcds.exe' || serveCommand='srcds_run'
+  serveCommand="./$serveCommand -game $game -console +port $port +map $map $serverArgs $@"
+fi
+
+echo "$serveCommand"
+
+[[ "$platform" == 'windows' ]] && powsh "$serveCommand" || bash -c "$serveCommand"

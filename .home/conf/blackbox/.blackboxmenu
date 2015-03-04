@@ -1,0 +1,8 @@
+[begin] (b l a c k b o x )
+	[exec] (firefox) {firefox}
+	[exec] (xterm) {xterm}
+	[nop] ()
+	[reconfig] (reconfigure)
+	[restart] (restart) {}
+	[exit] (exit)
+[end]

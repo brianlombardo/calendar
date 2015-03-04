@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "keyboard": "drop/thekey/v2",
+  "keymap": "drop_thekey_v2_layout",
+  "layout": "LAYOUT",
+  "layers": [
+    [
+      "KC_ESC",
+      "MO(1)",
+      "KC_LGUI"
+    ],
+    [
+      "TG(2)",
+      "KC_TRNS",
+      "TG(3)"
+    ],
+    [
+      "TG(2)",
+      "RGB_M_R",
+      "RGB_SPD"
+    ],
+    [
+      "KC_W",
+      "KC_SPC",
+      "TG(3)"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ],
+    [
+      "KC_NO",
+      "KC_NO",
+      "KC_NO"
+    ]
+  ],
+  "author": "tranquilo"
+}

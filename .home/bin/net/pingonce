@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$whereami" == 'windows' ]]; then ping='ping -w 1 -n 1'
+else ping='ping -W 1 -c 1'; fi
+
+if [[ "$1" == '-q' ]]; then shift
+  $ping $@ > /dev/null 2>&1
+else
+  ip="`$ping $@|$awk '{print $3}'|head -1`"
+  ip="${ip//'('/}"
+  ip="${ip//')'/}"
+  [[ "$ip" ]] && echo "${ip//':'/}"
+fi

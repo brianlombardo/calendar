@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$whereami" == 'darwin' ]]; then echo "`system_profiler SPHardwareDataType | grep "Model Identifier" | $awk '{print $3}'`" # grep "Model Identifier\|Model Number"
+elif [[ "$whereami" == 'windows' ]]; then wmic baseboard get product,Manufacturer
+else sudo dmidecode -s system-product-name; fi

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+
+export precision="$1"
+if [[ "$2" ]]; then shift
+  clac $@
+else
+  cat | clac
+fi

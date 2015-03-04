@@ -1,0 +1,4 @@
+[package]
+name = "vendor_shed"
+version = "123456.78.90"
+edition = "2021"

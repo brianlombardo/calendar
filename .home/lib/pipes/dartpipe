@@ -1,0 +1,13 @@
+#!/usr/bin/env dart
+
+import 'dart:io';
+
+main(List<String> args) {
+  var line;
+  do {
+    line = stdin.readLineSync();
+    print(line ?? '');
+  } while (line != null);
+
+  for (var arg in args) print(arg);
+}

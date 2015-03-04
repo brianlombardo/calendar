@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+function ansicode {
+  ansicode= bright=
+  if [[ "$ansi_start" != 'none' ]]; then start=${ansi_start}; fi
+  if [[ "$ansi_esc" != 'none' ]]; then esc=${ansi_esc:-m}; fi
+
+  while [[ "$1" ]]; do
+    ansicode+="${start}"
+    if [[ "$1" == 'bright' ]]; then bright='60'; shift; fi
+    if [[ "$1" == 'default' ]]; then ansicode+='10'
+    elif [[ "$1" == 'black' ]]; then ansicode+="$((30+${bright:-0}))"
+    elif [[ "$1" == 'red' ]]; then ansicode+="$((31+${bright:-0}))"
+    elif [[ "$1" == 'green' ]]; then ansicode+="$((32+${bright:-0}))"
+    elif [[ "$1" == 'yellow' ]]; then ansicode+="$((33+${bright:-0}))"
+    elif [[ "$1" == 'blue' ]]; then ansicode+="$((34+${bright:-0}))"
+    elif [[ "$1" =~ ^mag(enta)?$ ]]; then ansicode+="$((35+${bright:-0}))"
+    elif [[ "$1" == 'cyan' ]]; then ansicode+="$((36+${bright:-0}))"
+    elif [[ "$1" == 'white' ]]; then ansicode+="$((37+${bright:-0}))"
+    elif [[ "$1" == 'gray' ]]; then ansicode+='90'
+    elif [[ "$1" =~ ^b(old)?$ ]]; then ansicode+='1'
+    elif [[ "$1" =~ ^i(talic)?s?$ ]]; then ansicode+='3'
+    elif [[ "$1" =~ ^u(nderline)?$ ]]; then ansicode+='4'
+    elif [[ "$1" == 'blink' ]]; then ansicode+='5'
+    elif [[ "$1" =~ ^s(trike)?$ ]]; then ansicode+='9'
+    elif [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then ansicode+="38;2;${1//'.'/';'}"
+    elif [[ "$1" =~ ^([0-9A-Fa-f]{6}) ]]; then ansicode+="38;2;$((16#${1:0:2}));$((16#${1:2:2}));$((16#${1:4:2}))"
+    elif [[ "$1" =~ ^([0-9A-Fa-f]{3}) ]]; then ansicode+="38;2;$((16#${1:0:1}${1:0:1}));$((16#${1:1:1}${1:1:1}));$((16#${1:2:1}${1:2:1}))"
+    elif [[ "$1" =~ ^random?$ ]]; then ansicode+="38;2;$((RANDOM%255));$((RANDOM%255));$((RANDOM%255))"
+    elif [[ "$1" == 'any' ]]; then ansicode+="$((${bright:-0}+31+RANDOM%6))"
+    else ansicode+='10'; fi
+    ansicode+="${esc}"
+    shift
+  done
+}
+style="$1"
+ansicode ${style//,/ }
+if [[ "$ansicode" ]]; then echo ${ansicode}; fi

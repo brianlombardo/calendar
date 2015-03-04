@@ -1,0 +1,34 @@
+function chhome { local HOME="`realpath "$@"`"
+  if [[ -d "$HOME" ]]; then cd "$HOME" && exec "$SHELL"; fi
+}
+
+function why {
+  if [[ "$2" == 'fun' ]]; then
+    why "$1" | grep '^function ' | $awk '{print $2}'; return
+  elif [[ "$1" ]]; then local _command_="`command -v "$1" 2> /dev/null`"
+  else return; fi
+  if type bat &>/dev/null; then bat='bat'; else bat='cat'; fi
+  if [[ "$_command_" == "$1" ]]; then echo -e "#!$SHELL\n# `type $_command_`" | $bat
+  elif is binary "$_command_"; then echo "$1 is a binary: $_command_" | $bat
+  elif is file "$_command_"; then echo -e "`$bat "$_command_"`\n\n#!$_command_" | $bat
+  elif ! is empty "$_command_"; then echo -e "#!$SHELL\n$_command_" | $bat
+  else echo "$1 not found" | $bat; fi
+}
+
+function vdi2img { VBoxManage clonehd "$1" "${1/.vdi/.img}" --format RAW; }
+
+function _shtyle_set { export PROMPT_ICON=${1:-'>:'} PROMPT_COLOR=${2:-'white'} PROMPT_ACCENT=${3:-'white'} PROMPT_BODY=${4:-'default'}; }
+function shtyle { _shtyle_set $@; echo "$PROMPT_ICON" "$PROMPT_COLOR" "$PROMPT_ACCENT" "$PROMPT_BODY" > "$HOME/.shtyle"; }
+if [[ ! -f "$HOME/.shtyle" ]]; then shtyle
+else _shtyle_set `<"$HOME/.shtyle"`; fi
+
+if [[ ! -f "$HOME/.vimrc" ]]; then echo -e 'color elflord\nset number\nset backspace=2\n:cabbr qq q!\n:cabbr Q q\n:cabbr X x' > "$HOME/.vimrc"; fi
+
+alias qq='exit'
+alias hide='clear; PROMPT="" PS1=""'
+alias gg='grep --color=always -iE'
+alias iddqd='sudo su -'
+export GREP_COLORS="ms=`ansi_esc=none ansicode bright,$PROMPT_COLOR`"
+export BAT_STYLE='grid,numbers' BAT_PAGER=''
+export GPG_TTY="`tty`"
+export EDITOR='vim'

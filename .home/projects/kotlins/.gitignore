@@ -1,0 +1,7 @@
+/shelf/
+*.DS_Store
+/workspace.xml
+build/
+.gradle/
+.idea/
+local.properties

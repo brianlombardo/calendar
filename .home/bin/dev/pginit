@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+# pkg i postgresql@14
+# serv r postgresql@14
+
+if [[ "$pg_user" && "$pg_pass" && "$pg_db" ]]; then
+  # postgres -c "create role $pg_user with login password '$pg_pass';"
+  # psql postgres -c "alter role $pg_user createdb;"
+  # psql postgres -U "$pg_user" -c "create database $pg_db;"
+
+   createuser $pg_user
+   createdb $pg_db
+   psql <<<EOF
+    alter user $pg_user with encrypted password "$pg_pass";
+    grant all privileges on database $pg_db to $pg_user;
+   EOF
+fi
+# psql -U "$pg_user" -d "$pg_db" -c "SELECT * FROM $TABLE_NAME;"
+# psql -U "$pg_user" -d "$pg_db" -f file.sql
+# psql -U "$pg_user" -d "$pg_db" < file.sql

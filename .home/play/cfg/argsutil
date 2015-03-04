@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+set -e
+
+declare -A engines=(
+['arma']='-nosplash
+-skipIntro
+-noLogs
+-cfg=wasd.cfg'
+['q3']='+set r_fullscreen 1
++set cg_drawfps 1
++seta r_mode -1
++seta r_customwidth 2560
++seta r_customheight 1440
++seta cg_fov 90
++set cl_renderer opengl1'
+['rss']='-vulkan
+-dx11
+-d3d10
+-dx9
+-gl
+-nogrammeramp
+-con_enable 1
+-console
+-fullscreen
+-h 2560
+-w 1440
+-x 0
+-y 0
+-novsync
+-nomansky
+-antiaddiction_test
+-nod3d9ex
+-override_vpk
+-enable_addons
+-nomousegrab
+-nomicsettings
+-nosound
+-32bit
+-useallavailablecores
+-sm4
+-lowmemory'
+['hl']='-steam
+-game cstrike
+-noforcemaccel
+-noforcemparms
+-noipx
+-nojoy'
+['hl2']='-steam
+-game cstrike
+-vulkan
+-fullscreen
+-window
+-noborder
+-width 2560
+-w 2560
+-height 1440
+-h 1440
+-novid
+-sillygibs
+-nojoy
+-console
+-preload
+-high
+-threads 12
+-freq 144
+-refresh 144
+-forcenovsync
+-softparticlesdefaultoff
+-nohltv
++fps_max 240
++fps_max_splitscreen 120
++fps_max_menu 30
++fps_max_ui 30
++cl_forcepreload 1
++engine_low_latency_sleep_after_client_tick true
++r_dynamic 1
++mat_disable_fancy_blending 1
++violence_ablood 0
++violence_agibs 0
++violence_hblood 0
++violence_hgibs 0
++exec autoexec.cfg
++connect 12.3.456.123:27015'
+['steam']='--screen-size=1280,800'
+['unreal']='-useallavailablecores
+-nosplash
+-notexturestreaming
+-preferredprocessor 4
+-onethread
+-nosound
+-noforcefeedback
+-nohomedir
+-nomansky
+-sm4
+-refresh 144
+-malloc=system
+-maxMem=4096'
+)
+if [[ "$1" ]]; then engine=${engines["$1"]}; fi
+if [[ ! "$engine" ]]; then engine="engines: ${!engines[@]}"; fi
+
+echo "$engine"
+
+# TODO update steam/userdata/userid/config/localconfig.vdf

@@ -1,0 +1,19 @@
+[package]
+name = "uniffi_shed"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+uniffi = "0.23.0"
+uniffi_macros = "0.23.0"
+
+[build-dependencies]
+uniffi_build = "0.23.0"
+
+[lib]
+crate-type = ["staticlib", "cdylib"]
+name = "playground"
+
+[profile.release]
+codegen-units = 1
+lto = true

@@ -1,0 +1,8 @@
+[package]
+name = "test_shed"
+version = "1.2.3"
+edition = "2021"
+
+[dependencies]
+rand = "*"
+tailcall = "0.1.6"

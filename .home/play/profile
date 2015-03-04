@@ -1,0 +1,2 @@
+export PLAY="$DOTHOME/play"
+include  "$PLAY/bin"

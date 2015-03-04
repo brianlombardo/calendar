@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -e
+
+function _awk_clac { exec $awk "{ print "$expression" }" <<< ''; }
+
+function _node_clac { exec node -pe "$expression"; }
+
+function _perl_clac { exec perl -E "say $expression"; }
+
+function _python_clac { exec python3 <<< "print($expression)"; }
+
+function _ruby_clac { exec ruby -e "p $expression"; }
+
+function _sqlite_clac { exec sqlite3 <<< "select $expression"; }
+
+function _zsh_clac { exec zsh <<< "echo \$(("$expression"))"; }
+
+function _bc_clac { exec bc <<< "$expression"; }
+
+function _clac_op_add { local expression="$@"; _clac "${expression// /+}"; }
+function _clac_op_sub { local expression="$@"; _clac "${expression// /-}"; }
+function _clac_op_mul { local expression="$@"; _clac "${expression// /\*}"; }
+function _clac_op_div { local expression="$@"; _clac "${expression// /\/}"; }
+function _clac_op_avg { local expression="$@"; _clac "(${expression// /+})/$#"; }
+
+# function _pi { _clac 'atan2(0,-1)'; }
+
+function _clac { local expression="$@"
+  expression="${expression// /}"
+  expression="${expression//,/}"
+  expression="${expression//$/}"
+  expression="${expression//x/*}"
+  expression="${expression//--/+}"
+  expression="${expression//pi/3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067}"
+  expression="${expression//e/2.718281828459045235360287471352662497757247093699959574966967627724076630353547594571382178525166427}"
+
+  if grep -q '==\|<' <<< "$expression"; then if ! (( "`$solver`" == 1 )); then return 1; fi
+  elif [[ "$precision" ]]; then $solver | $awk "{printf(\"%.${precision}f\n\", \$1)}"
+  else $solver; fi
+}
+
+solver="_${solver:-awk}_clac"
+
+if [[ "$1" =~ ^add$|^sub$|^mul$|^div$|^avg$ ]]; then op=$1;shift
+  if [[ "$1" ]]; then __vals="$@"; else __vals=`cat`; fi
+  _clac_op_$op $__vals
+elif [[ "$1" ]]; then
+  _clac "$@"
+else while read -r __clac; do
+  _clac "$__clac"
+done; fi

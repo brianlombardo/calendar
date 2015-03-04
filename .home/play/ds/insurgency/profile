@@ -1,0 +1,4 @@
+export gameid='237410'
+export map='buhriz'
+export port='27018'
+export serverArgs='+ins_bot_quota 13 +maxplayers 24'

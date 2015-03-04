@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+cd "`dirname "$0"`"
+
+if [[ "$1" =~ ^b(uild)?$ ]]; then
+  docker build -t devtime .
+else
+  dt_home="${DEVTIME:-$HOME/.devtime}"
+  mkdir -p "$dt_home"
+  docker run \
+    -v "$dt_home:/home/trnqilo/.devtime:rw" \
+    -v "$HOME/.ssh:/home/trnqilo/.ssh:ro" \
+    -it devtime
+fi

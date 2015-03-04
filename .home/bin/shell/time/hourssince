@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [[ "$1" ]]; then
+  starttimestamp="`value $1`"
+  [[ "$2" ]] && endtimestamp="$2" || endtimestamp="`date +%s`"
+  clac "($endtimestamp-$starttimestamp)/60.0/60.0" && exit
+fi
+echo 0

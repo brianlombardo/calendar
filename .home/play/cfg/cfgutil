@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -e
+
+cd "$PLAY/cfg"
+
+function _util_apply { steam_check
+  STEAM_APPS_COMMON="$STEAM_HOME/steamapps/common"
+  cp -vr \
+  'Apex Legends' \
+  'Counter-Strike Global Offensive' \
+  'Counter-Strike Source' \
+  'Half-Life' \
+  'Half-Life 2' \
+  'insurgency2' \
+  'Left 4 Dead 2' \
+  'Portal' \
+  'Portal 2' \
+  'Quake 3 Arena' \
+  'Rust' \
+  'Team Fortress 2' \
+  "$STEAM_APPS_COMMON/"
+
+  SOURCE_CFG='./Source/source.cfg'
+  cp -v "$SOURCE_CFG" "$STEAM_APPS_COMMON"'/Counter-Strike Source/cstrike/cfg/source.cfg'
+  cp -v "$SOURCE_CFG" "$STEAM_APPS_COMMON"'/Half-Life 2/hl2/cfg/source.cfg'
+  cp -v "$SOURCE_CFG" "$STEAM_APPS_COMMON"'/insurgency2/insurgency/cfg/source.cfg'
+  cp -v "$SOURCE_CFG" "$STEAM_APPS_COMMON"'/Left 4 Dead 2/left4dead2/cfg/source.cfg'
+  cp -v "$SOURCE_CFG" "$STEAM_APPS_COMMON"'/Portal/portal/cfg/source.cfg'
+  cp -v "$SOURCE_CFG" "$STEAM_APPS_COMMON"'/Portal 2/portal2/cfg/source.cfg'
+  cp -v "$SOURCE_CFG" "$STEAM_APPS_COMMON"'/Team Fortress 2/tf/cfg/source.cfg'
+
+  SOURCE2_CFG='./Source2/source2.cfg'
+  cp -v "$SOURCE2_CFG" "$STEAM_APPS_COMMON"'/Counter-Strike Global Offensive/game/csgo/cfg/source2.cfg'
+
+  # mv -v "$STEAM_APPS_COMMON"'/Apex Legends/cfg/settings.cfg' "$HOME/Saved Games/Respawn/Apex/local"
+}
+
+function _util_custom { steam_check
+  surely sure 'copy custom assets' || exit
+
+  cd "$PLAY/cfg/Source/"
+  CSTRIKE_CUSTOM="`realpath ./cstrike`"
+
+  cd "$STEAM_HOME/steamapps/common/Counter-Strike Source/cstrike"
+  rm -fr custom
+  tar zxfv "$CSTRIKE_CUSTOM"
+}
+
+function steam_check {
+  [[ ! -d "$STEAM_HOME/steamapps/common" ]] \
+    && echo 'STEAM_HOME directory is invalid.' \
+    && exit 1 ||:
+}
+
+
+"_util_${1:-apply}"

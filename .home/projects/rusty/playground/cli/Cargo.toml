@@ -1,0 +1,11 @@
+[package]
+name = "rusty_playground_cli"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+rusty_playground_client = { version = "*", path = "../client" }
+tokio = { version = "1.12.0", features = ["full"] }
+reqwest = "0.11.17"
+
