@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+set  -e
+
+function freebsd { $sudo /usr/sbin/pkg $@; }
+
+function netbsd { $sudo pkgin $@; }
+
+function android { apt $@; }
+
+function windows { sudo=; arch $@; }
+
+function darwin {
+  if [[ "$1" == 'install' ]]; then shift
+    brew install --no-quarantine $@
+  elif [[ "$1" == 'remove' ]]; then shift
+    brew uninstall $@
+  else
+    brew $@
+  fi
+}
+
+function ios { alpine $@; }
+
+function linux {
+  if type apt &>/dev/null; then
+    $sudo apt $@
+  elif type pacman &>/dev/null; then
+    arch $@
+  elif type dnf &>/dev/null; then
+    redhat $@
+  elif type apk &>/dev/null; then
+    alpine $@
+  fi
+}
+
+function openbsd {
+  local op="$1"; shift
+  if [[ "$op" == 'install' ]]; then
+    $sudo pkg_add $@
+  elif [[ "$op" == 'search' ]]; then
+    $sudo pkg_info -Q $@
+  elif [[ "$op" == *'remove' ]]; then
+    $sudo pkg_delete $@
+  elif [[ "$op" == 'autoremove' ]]; then
+    $sudo pkg_delete -a
+  elif [[ "$op" == 'upgrade' ]]; then
+    $sudo pkg_add -u
+  elif [[ "$op" == 'update' ]]; then
+    $sudo pkg_check $@
+  fi
+}
+
+function arch {
+  local op="$1"; shift
+  if [[ "$op" == 'install' ]]; then
+    $sudo pacman -S $@
+  elif [[ "$op" == 'search' ]]; then
+    $sudo pacman -Ss $@
+  elif [[ "$op" == 'remove' ]]; then
+    $sudo pacman -Rs $@
+  elif [[ "$op" == 'autoremove' ]]; then
+    $sudo pacman -Rs `$sudo pacman -Qdtq`
+  elif [[ "$op" == 'upgrade' ]]; then
+    $sudo pacman -Syu $@
+  elif [[ "$op" == 'update' ]]; then
+    $sudo pacman -Syy $@
+  else
+    $sudo pacman $op $@
+  fi
+}
+
+function redhat {
+  if [[ "$1" == 'update' ]]; then local ops='check-update'
+  else local ops="$@"; fi
+  $sudo dnf $ops
+}
+
+function alpine {
+  local op="$1"; shift
+  if [[ "$op" == 'install' ]]; then
+    apk add $@
+  elif [[ "$op" == 'search' ]]; then
+    apk list $@
+  elif [[ "$op" == 'remove' ]]; then
+    apk del $@
+  elif [[ "$op" == 'upgrade' ]]; then
+    apk upgrade --no-cache $@
+  elif [[ "$op" == 'autoremove' ]]; then :
+  else
+    apk $op $@
+  fi
+}
+
+function callpm { sudo=sudo
+  if [[ "$1" ]]; then local op="$1"; shift; fi
+
+  if [[ ! "$op" ]]; then
+    local op='update'
+  elif [[ "$op" == 'i' ]]; then
+    local op='install'
+  elif [[ "$op" == 's' ]]; then
+    local op='search'
+  elif [[ "$op" == 'r' ]]; then
+    local op='remove'
+  elif [[ "$op" == 'ar' ]]; then
+    local op='autoremove'
+  elif [[ "$op" == 'u' ]]; then
+    local op='update'
+  elif [[ "$op" == 'up' ]]; then
+    callpm u
+    local op='upgrade'
+  elif [[ "$op" == 'yolo' ]]; then
+    callpm up
+    local op='autoremove'
+  elif [[ "$op" == 'init' ]]; then
+    callpm u && callpm i gawk git tig tmux vim wget curl bash bash-completion
+    surely "install $packages" && callpm i $packages
+    return
+  fi
+
+  $whereami $op $@
+}
+
+callpm $@

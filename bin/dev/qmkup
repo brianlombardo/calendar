@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+bin=''
+if ! type qmk &>/dev/null; then
+  if [[ "$whereami" == "darwin" ]]; then
+    pkg install qmk/qmk/qmk
+    bin="/usr/local/bin/"
+  else
+    pkg install python3-pip
+    python3 -m pip install --user qmk
+    bin="$HOME/.local/bin/"
+  fi
+fi
+"$bin"qmk setup

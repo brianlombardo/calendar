@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+if ! type ffmpeg &>/dev/null; then echo 'ffmpeg is not installed.'; exit; fi
+if [[ "$2" ]]; then target="`realpath "$2"`"; fi
+if [[ "$1" ]]; then cd "$1"; fi
+for f in *.m4a; do ffmpeg -i "$f" -codec:v copy -codec:a libmp3lame -q:a 2 "${target:-.}/${f%.m4a}.mp3"; done

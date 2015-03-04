@@ -1,0 +1,8 @@
+[package]
+name = "yew_shed"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+yew = { version = "0.20.0", features = ["csr"] }
+rusty_playground_client = { version = "*", path = "../../playground/client" }

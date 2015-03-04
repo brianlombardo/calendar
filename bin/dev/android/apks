@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$1" == 'sign' ]]; then shift
+  [[ "$1" ]] \
+    && java -Xmx512m -jar "$ANDROID_HOME/uber-apk-signer-1.1.0.jar" \
+        --debug -a "$1" -o "$1.signed" # --overwrite --allowResign
+elif [[ "$1" == 'rebuild' ]]; then shift
+  [[ "$1" ]] && rebuilt_apk="$1" || exit 1
+  rebuilt_apk+='_rebuilt.apk'
+  apktool b "$1" -o "$rebuilt_apk"
+  java -Xmx512m -jar "$ANDROID_HOME/uber-apk-signer-1.1.0.jar" \
+    --debug -a "$rebuilt_apk" --overwrite --allowResign
+elif [[ "$1" =~ ^'deco'$|^'decompile'$ ]]; then shift
+  [[ "$1" ]] && apktool d $@
+elif [[ "$1" == 'pull' ]]; then shift
+  [[ "$1" ]] && adb pull "/data/app/$1-1/base.apk" "$1.apk"
+fi

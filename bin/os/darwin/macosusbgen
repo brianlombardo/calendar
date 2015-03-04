@@ -1,0 +1,1 @@
+echo "sudo $1/Contents/Resources/createinstallmedia --volume $2"

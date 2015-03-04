@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+t=0
+threads=${threads:-`cpus`}
+pipe="${@:-cat}"
+
+while read line; do let ++t
+  if [[ "$line" ]]; then
+    $pipe <<< "$line" &
+    if (( t == threads )); then t=0; wait; fi
+  fi
+done
+
+wait

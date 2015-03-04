@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ ! "$1" ]]; then echo 'root not provided'; exit
+elif [[ "$UID" != 0 ]]; then
+  sudo "$DOTHOME/bin/shell/file/fschroot" "$@"; exit
+fi
+
+if [[ -b "$1" ]]; then
+  root="`cat /proc/mounts | grep "^$1 " | $awk '{print $2}'`"
+  if [[ ! "$root" ]]; then
+    root="$HOME/.chroot"
+    mkdir -p "$root"
+    sudo mount "$1" "$root"
+  fi
+else
+  root="`realpath "$1"`"
+fi
+
+if [[ ! -d "$root/etc" ]]; then echo 'pass valid root.'; exit; fi
+
+mount proc "$root/proc" -t proc -o nosuid,noexec,nodev || echo 'mount proc failed.'
+mount sys "$root/sys" -t sysfs -o nosuid,noexec,nodev,ro || echo 'mount sys failed.'
+mount udev "$root/dev" -t devtmpfs -o mode=0755,nosuid || echo 'mount udev failed.'
+mount devpts "$root/dev/pts" -t devpts -o mode=0620,gid=5,nosuid,noexec || echo 'mount devpts failed.'
+mount shm "$root/dev/shm" -t tmpfs -o mode=1777,nosuid,nodev || echo 'mount shm failed.'
+mount /run "$root/run" --bind || echo 'mount run failed.'
+mount tmp "$root/tmp" -t tmpfs -o mode=1777,strictatime,nodev,nosuid || echo 'mount tmp failed.'
+
+if [[ -d "$root/sys/firmware/efi/efivars" ]]; then
+  mount efivarfs "$root/sys/firmware/efi/efivars" -t efivarfs -o nosuid,noexec,nodev || echo 'mount efivarfs failed.'
+fi
+
+resolv_conf="$root/etc/resolv.conf"
+
+if [[ -L "$resolv_conf" ]]; then
+  resolv_conf=`readlink "$root/etc/resolv.conf"`
+  if [[ "$resolv_conf" == '/'* ]]; then resolv_conf="$root$resolv_conf"
+  else resolv_conf="$root/etc/$resolv_conf"; fi
+
+  if [[ ! -f "$resolv_conf" ]]; then
+    install -Dm644 /dev/null "$resolv_conf" || echo 'install null resolv.conf failed'
+  fi
+fi
+
+mount /etc/resolv.conf "$resolv_conf" --bind || echo 'mount resolv.conf failed'
+
+chroot "$root"

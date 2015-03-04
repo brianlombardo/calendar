@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+[[ ! "$1" ]] || imdisk -a -t vm -s "$1G" -m R: -p "/FS:NTFS /V:RamDisk /Q /Y" -o rem

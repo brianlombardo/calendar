@@ -1,0 +1,29 @@
+[[ -f "$HOME/.bashrc" ]] \
+  && grep -q 'source "$HOME/\.home/bashrc"' "$HOME/.bashrc" \
+    || echo 'source "$HOME/.home/bashrc"' >> "$HOME/.bashrc"
+
+[[ -f "$HOME/.zshrc" ]] \
+  && grep -q 'source "$HOME/\.home/zshrc"' "$HOME/.zshrc" \
+    || echo 'source "$HOME/.home/zshrc"' >> "$HOME/.zshrc"
+
+if [[ -f "$HOME/.bash_profile" ]]; then
+  grep -q 'source "$HOME/\.home/bashrc"' "$HOME/.bash_profile" \
+    || echo 'source "$HOME/.home/bashrc"' >> "$HOME/.bash_profile"
+fi
+
+if [[ -f "$HOME/.zprofile" ]]; then
+  grep -q 'source "$HOME/\.home/zshrc"' "$HOME/.zprofile" \
+    || echo 'source "$HOME/.home/zshrc"' >> "$HOME/.zprofile"
+fi
+
+"$SHELL" -c 'cd
+  ls -d .git.home || mv .git .git.home
+  mv "$HOME/readme" "$HOME/.home" ||:
+  mv "$HOME/license" "$HOME/.home" ||:
+' > /dev/null 2>&1
+
+if [[ "$ZSH_VERSION" ]]; then
+  source "$HOME/.zshrc"
+elif [[ "$BASH_VERSION" ]]; then
+  source "$HOME/.bashrc"
+fi
