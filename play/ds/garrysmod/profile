@@ -1,0 +1,4 @@
+export gameid='4020'
+export map='gm_flatgrass'
+export port='27017'
+export serverArgs='' # +gamemode terrortown +host_workshop_collection 12345 +sv_setsteamaccount $STEAM_ACCOUNT_TOKEN

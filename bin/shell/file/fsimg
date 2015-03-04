@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -e
+
+# function _fsimg_from { local img="$1"
+#   if [[ "$img" == *'.vdi' ]]; then
+#     VBoxManage clonehd "$img" "${img/.vdi/.img}" --format raw
+#   elif [[ "$img" == *'.qcow2' ]]; then
+#     qemu-img convert -f qcow2 -O raw "$img" "${img/.qcow2/.img}"
+#   fi
+# }
+
+# function _fsimg_vdi { local img="$1"; VBoxManage convertfromraw "$img" "${img/.img/.vdi}"; }
+
+function _fsimg_grow {
+  if [[ "$2" ]]; then loopsize="$2"
+  else read -p 'add MB [10240] ' loopsize; fi
+  loopsize=${loopsize:-'10240'}
+  surely "append $loopsize MB to $1"
+  sudo bash -c "dd if=/dev/zero bs=1M count=$loopsize status=progress >> '$1'"
+}
+
+function _fsimg_resize { sudo e2fsck -f "$1"; sudo resize2fs "$1"; }
+
+_fsimg_$@

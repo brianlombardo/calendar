@@ -1,0 +1,12 @@
+[package]
+name = "gl_shed"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = {version = "1.28.0", features = ["full"]}
+tokio-runtime = "0.0.0"
+fps_clock = "2.0.0"
+futures = "0.3.28"
+glium = "0.32.1"
+rand = "0.8.5"

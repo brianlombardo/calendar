@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$1" =~ ^err(or)?$ ]]; then shift; tostderr=true; fi
+
+if [[ "$2" ]]; then style="$1"; shift
+  if [[ "$1" == '-' ]]; then text="`cat`"; else text="$@"; fi
+  parrot="\e[0;`ansi_start='\e[' ansicode $style`${text}\e[0m"
+  if [[ "$tostderr" ]]; then >&2 echo -e "$parrot"
+  else echo -e "$parrot"; fi
+fi

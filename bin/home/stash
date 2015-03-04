@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -e
+
+[[ ! "$STASH_ROOT" ]] && echo 'set STASH_ROOT.' && exit || cd "$STASH_ROOT"
+[[ ! "$1" ]] && parrot magenta 'pass stash name.' && exit
+STASH="$1"; shift
+
+function _init {
+  if [[ ! -d ".git.$STASH" ]]; then
+    git init -b "$STASH"
+    echo -e '*\n!.gitignore' > .gitignore
+    git add -A
+    git commit -m"$STASH"
+    git config core.autocrlf false
+    parrot yellow "* $STASH initialized. use 'stash include DIR_NAME'"
+  else
+    _enable
+  fi
+}
+function stash_include {
+  [[ ! -d "$@" ]] && echo "$@ not found in $STASH_HOME" && return
+  include_dir=${@%/}
+  include_dir=${include_dir//' '/'\ '}
+  grep -q "$include_dir" .gitignore && parrot magenta "$include_dir already included." && return || :
+  echo "!$include_dir/" >> '.gitignore'
+  [[ "$include_depth" ]] || include_depth='30'
+  for (( index = 1 ; index < "$include_depth" ; ++index )) ; do
+    include_dir="$include_dir/*"
+    echo "!$include_dir" >> '.gitignore'
+  done
+  stash_save
+}
+function _enable { mv ".git.$STASH" '.git'; }
+function _disable { mv '.git' ".git.$STASH"; }
+function stash_create { stash_save; git checkout "$STASH" && git checkout -b "$1" && git commit -m"$1"; parrot green "$1 created."; }
+function stash_delete { surely "delete '$1'" && git checkout "$STASH" && git branch -D "$1"; }
+function stash_list { git branch -a | grep -v "$STASH" && return; parrot red "* $STASH empty. use 'stash create LABEL'"; }
+function stash_save { git add -A && git commit --amend --no-edit || parrot magenta 'save failed.'; }
+function stash_shell { plush; }
+function stash_switch { stash_save; git checkout "${1:-"-"}"; }
+
+[[ ! "$1" ]] && parrot cyan 'stash [name] [command]
+commands:
+
+create [name]
+switch [name]
+delete [name]
+include [dir name]
+save
+list
+shell
+' && exit
+
+func="$@" 
+
+_init
+stash_$func || :
+_disable

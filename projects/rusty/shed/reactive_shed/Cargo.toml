@@ -1,0 +1,10 @@
+[package]
+name = "reactive_shed"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rxrust = "1.0.0-beta.3"
+rayon = "1.7.0"
+reqwest = { version = "0.11.17", features = ["json","blocking"] }
+rusty_playground_model = { version = "*", path = "../../playground/model" }

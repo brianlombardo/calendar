@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$whereami" == 'linux' ]]; then
+    # sudo pacman -Syy base-devel 
+    # sudo apt install lib32gcc-s1
+
+    sudo dpkg --add-architecture i386
+    sudo add-apt-repository multiverse
+
+    sudo apt update
+    sudo apt dist-upgrade
+
+    sudo apt install \
+        steamcmd build-essential curl screen unzip gdb \
+        libbz2-1.0 lib32stdc++6 libcurl3-gnutls libc++-dev \
+        libstdc++6:i386 libssl3 libstdc++6:i386 libcurl3-gnutls:i386\
+        lib32gcc-s1 lib32z1 lib32ncurses6
+else
+    # https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip
+    # https://steamcdn-a.akamaihd.net/client/installer/steamcmd_osx.tar.gz
+    # https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz
+
+    mkdir "$HOME/.steamcmd" && cd "$HOME/.steamcmd"
+    if [[ "$whereami" == 'darwin' ]]; then steamcmd='steamcmd_osx.tar.gz' deflate='tar zxvf'
+    elif [[ "$whereami" == 'windows' ]]; then steamcmd='steamcmd.zip' deflate='zip'; fi
+    curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/$steamcmd" | $deflate -
+fi

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+function setup {
+  source "$HOMETEST/expect"
+  source "$HOMETEST/when"
+  # source "$HOMETEST/verify"
+  date_command="`type date | $awk '{print $3}'`"
+  [[ "$failures" ]] && return || failures=0
+  [[ "$runs" ]] || runs=0
+  [[ "$time" ]] || time=`"$date_command" +%s`
+  [[ "$codegen" ]] && printf '' > "$HOME/codegen.sh"
+}; export -f setup
+
+function finish {
+  local now=`"$date_command" +%s`
+  let time=now-time
+  local color=cyan
+  [[ "$time" == '0' ]] && let tps="$runs" || let tps=runs/time
+  if [[ "$runs" -gt '30' ]]; then
+    [[ "$time" != '0' && "$tps" -lt '10' ]] && color='yellow'
+    [[ "$time" != '0' && "$tps" -lt '3' ]] && color='magenta'
+  fi
+  parrot $color "$runs ran in $time seconds at $tps tps"
+
+  let runs-=failures
+  parrot cyan "$runs passed"
+  if [[ "$failures" != '0' ]]; then
+    parrot magenta "$failures failed"
+  fi
+}; export -f finish
+
+function run {
+  testfiles=`find "$DOTHOME/bin" -type f -name \*'_tests' | grep "$1"`
+  [[ "$testfiles" ]] \
+    && echo "setup;`cat $testfiles \
+    | grep -v 'set -e\|/usr/bin/env bash\|. \$HOMETEST/'`;finish" \
+    | bash 2> /dev/null
+}
+
+run "$1"

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+perl -pi -e s/"$1"/"$2"/g "$3"

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -e
+
+function _fszfs_pool { sudo zpool create $@; }
+
+function _fszfs_import {  # pool zfs
+  sudo zpool import $1 -f
+  sudo zfs import $2 -f
+}
+
+function _fszfs_create {
+  if [[ "$encrypt" != false ]]; then zfs_opts='-o encryption=on -o keyformat=passphrase -o'; fi
+  sudo zfs create $zfs_opts -o compression=on "$1/$2"
+  if [[ "$3" ]]; then _fszfs_mountpoint $@; fi
+}
+
+function _fszfs_mountpoint { sudo zfs set mountpoint="$3" "$1/$2"; }
+
+function _fszfs_mount {
+  sudo zfs load-key "$1/$2"
+  sudo zfs mount "$1/$2"
+}
+
+function _fszfs_unmount {
+  sudo zfs umount "$1/$2"
+  sudo zfs unload-key "$1/$2"
+}
+
+function _fszfs_list {
+  sudo zpool list -v
+  sudo zfs list
+}
+
+function _fszfs_destroy { sudo zfs destroy -r "$1/$2"; }
+
+function _fszfs_snapshot {
+  if [[ "$1" == 'destroy' ]]; then shift sudo zfs destroy "$1/$2@$3"; fi
+  sudo zfs list -t snapshot
+}
+
+function _fszfs_samba { share smb $@; }
+
+function _fszfs_nfs { share nfs $@; }
+
+function _fszfs_gc { sudo zsysctl service gc --all; }
+
+function _fszfs_packages { sudo apt install zpool zfs zfs-dkms zfsutils-linux; }
+
+function share { share=$1; shift
+  if [[ "$2" ]]; then sudo zfs set "share${share}=${3:-on}" "$1/$2"; fi
+  sudo zfs get "share${share}"
+}
+
+_fszfs_${@:-list}
