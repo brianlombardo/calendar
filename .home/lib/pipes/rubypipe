@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+STDIN.read.split('\n').each do |line| puts line end
+ARGV.each do |argument| puts "#{argument}" end

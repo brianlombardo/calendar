@@ -1,0 +1,127 @@
+.
+style.name:	rootbox
+style.author:	qbik.root (sysdaemon@o2.pl)
+style.comments:	 Against all roots ;)
+
+
+rootCommand:                    bsetbg -solid rgb:1e/1e/1e
+
+
+! Toolbar settings...
+toolbar.button:	Raised Bevel2 Gradient Diagonal
+toolbar.button.color:	#606468
+toolbar.button.colorTo:	#747174
+toolbar.button.picColor:	#500000
+
+toolbar.button.pressed:	Sunken Bevel2 Gradient Diagonal
+toolbar.button.pressed.color:	#4b0000
+toolbar.button.pressed.colorTo:	#565558
+
+toolbar.label:	Sunken Bevel2 Gradient Diagonal
+toolbar.label.color:	#676368
+toolbar.label.colorTo:	#64636a
+toolbar.label.textColor:	#ffffff
+
+toolbar.windowLabel:	Sunken Bevel2 Gradient Diagonal
+toolbar.windowLabel.color:	#717073
+toolbar.windowLabel.colorTo:	#616161
+toolbar.windowLabel.textColor:	#ffffff
+
+toolbar.clock:	Sunken Bevel2 Gradient Diagonal
+toolbar.clock.color:	#787878
+toolbar.clock.colorTo:	#585858
+toolbar.clock.textColor:	#ffffff
+
+toolbar:	Raised Bevel2 Gradient Vertical
+toolbar.color:	#505458
+toolbar.colorTo:	#242424
+toolbar.textColor:	#ffffff
+toolbar.font:	-adobe-helvetica-medium-r-normal-*-*-100-*-*-p-*-iso8859-1
+toolbar.justify:	Center
+
+
+! Menu settings...
+menu.frame:	Sunken Bevel2 Gradient Diagonal
+menu.frame.color:	#575d5c
+menu.frame.colorTo:	#585858
+menu.frame.textColor:	#ffffff
+menu.frame.font:	-adobe-helvetica-medium-r-normal-*-*-100-*-*-p-*-iso8859-1
+menu.frame.justify:	Center
+
+menu.title:	Raised Bevel2 Gradient Diagonal
+menu.title.color:	#606468
+menu.title.colorTo:	#282828
+menu.title.textColor:	#ffffff
+menu.title.font:	-adobe-helvetica-medium-r-normal-*-*-100-*-*-p-*-iso8859-1
+menu.title.justify:	Center
+
+menu.hilite:	Raised Bevel2 Gradient Diagonal
+menu.hilite.color:	#740000
+menu.hilite.colorTo:	#000000
+menu.hilite.textColor:	#ffffff
+
+menu.bullet:	Square
+menu.bullet.position:	Right
+menu.frame.disableColor:	#aa5500
+
+! Window settings...
+window.button.focus:	Raised Bevel2 Gradient Diagonal
+window.button.focus.color:	#606468
+window.button.focus.colorTo:	#414141
+window.button.focus.picColor:	#ffffff
+
+window.button.unfocus:	Raised Bevel2 Gradient Diagonal
+window.button.unfocus.color:	#606468
+window.button.unfocus.colorTo:	#303030
+window.button.unfocus.picColor:	#606468
+
+window.grip.focus:	Sunken Bevel2 Gradient Diagonal
+window.grip.focus.color:	#676767
+window.grip.focus.colorTo:	#969696
+
+window.grip.unfocus:	Sunken Bevel2 Gradient Diagonal
+window.grip.unfocus.color:	#303030
+window.grip.unfocus.colorTo:	#585858
+
+window.handle.focus:	Raised Bevel2 Gradient Diagonal
+window.handle.focus.color:	#606468
+window.handle.focus.colorTo:	#595959
+
+window.handle.unfocus:	Raised Bevel2 Gradient Diagonal
+window.handle.unfocus.color:	#606468
+window.handle.unfocus.colorTo:	#272727
+
+window.label.focus:	Sunken Bevel2 Gradient Diagonal
+window.label.focus.color:	#6c6c6c
+window.label.focus.colorTo:	#585858
+window.label.focus.textColor:	#ffffff
+window.label.focus.font:	-adobe-helvetica-medium-r-normal-*-*-100-*-*-p-*-iso8859-1
+window.label.focus.justify:	Center
+
+window.font:	-adobe-helvetica-medium-r-normal-*-*-100-*-*-p-*-iso8859-1
+window.justify:	Center
+window.label.unfocus:	Sunken Bevel2 Gradient Diagonal
+window.label.unfocus.color:	#555555
+window.label.unfocus.colorTo:	#363636
+window.label.unfocus.textColor:	#505458
+
+window.title.focus:	Raised Bevel2 Gradient Vertical
+window.title.focus.color:	#505458
+window.title.focus.colorTo:	#353535
+
+window.title.unfocus:	Raised Bevel2 Gradient Vertical
+window.title.unfocus.color:	#505458
+window.title.unfocus.colorTo:	#1f1f1f
+
+window.button.pressed:	Sunken Bevel2 Gradient Diagonal
+window.button.pressed.color:	#4c0000
+window.button.pressed.colorTo:	#585858
+
+window.frame.focusColor:	#ffffff
+window.frame.unfocusColor:	#ffffff
+handleWidth:	3
+frameWidth:	0
+bevelWidth:	1
+borderWidth:	1
+borderColor:	#000000
+

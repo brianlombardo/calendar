@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+pkg i gccgo gobjc gnustep-devel lua5.4 php ruby
+echo '
+# sdk install groovy
+# sdk install kotlin
+# sdk install java
+# kotlin native https://github.com/JetBrains/kotlin/releases/latest
+'

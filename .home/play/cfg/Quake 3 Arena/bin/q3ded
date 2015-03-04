@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+screen -m -S quake ioq3ded +exec server.cfg # +set dedicated 1 +set net_port 27960 +set net_ip xx.xx.xx.xxx

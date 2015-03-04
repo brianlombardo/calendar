@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -e
+
+function url_to_path {
+  url="$1"; url="${url#*/}"; url="${url%%[?#]*}"; url="${url#*/}"
+  echo "$url"
+}
+
+curl_cache="${CURLCACHE_DIR:-$HOME/.curlcache}"
+cache_file=`md5sum <<< "$@" | $awk '{print $1}'`
+
+url="$1"
+shift && args="$@" || args=
+
+cache_dir="$curl_cache/`url_to_path "$url"`"
+cache_file="$cache_dir/$cache_file"
+
+if [[ "$clobber" == true || ! -f "$cache_file" ]]; then
+  mkdir -p "$cache_dir"
+  echo "# $url $args" > "$cache_file"
+  curl -s $args $url >> "$cache_file"
+fi
+
+tail -n+2 "$cache_file"

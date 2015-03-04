@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+hour=`date +%H`
+if [[ ! -f '/dev/shm/hsquiet' ]] \
+  && ([[ "$hour" -lt 7 ]] || [[ "$hour" -gt 19 ]]); then
+  /usr/local/bin/hsmessage "MOVEMENT"
+fi
+
+dir=`date +"%m-%d-%y"`_`hostname`
+[[ -f '/dev/shm/hsquiet' ]] && dir="silentsitter/$dir" ||:
+
+/usr/local/bin/dbu -f /etc/default/housesitter upload "$1" "/$dir/" ||:
+
+rm "$1"

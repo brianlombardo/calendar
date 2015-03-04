@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# ty kholia https://github.com/kholia/osx-kvm
+set -e
+
+cd "${maco:-"."}"
+
+function maco_boot {
+  efi="./${efi:-efi}.img"
+  root="./${root:-root}.img"
+  if [[ ! -f "$efi" ]]; then echo "$efi not found."; exit
+  elif [[ ! -f "$root" ]]; then echo "$root not found."; exit; fi
+
+  if [[ ! "$cpu" ]]; then
+    if lscpu | grep -q 'Model name: \+AMD'; then cpu='Haswell' # cpu='Penryn'
+    else cpu='host'; fi
+  fi
+
+  if [[ ! "$cpus" ]]; then
+    cpus=`cpus | $awk '{cpus=2^int(log($1)/log(2));print(cpus<4?4:cpus)}'`
+  fi
+
+  smc="-device `base64 -d \
+    <<<aXNhLWFwcGxlc21jLG9zaz1vdXJoYXJkd29ya2J5dGhlc2V3b3Jkc2d1YXJkZWRwbGVhc2Vkb250c3RlYWwoYylBcHBsZUNvbXB1dGVySW5jCg==`"
+
+  if [[ "$net" == false ]]; then net=''
+  else net="
+      -netdev user,id=net0,hostfwd=tcp::5555-:22
+      -device virtio-net-pci,netdev=net0,id=net0,mac=${net:-"12:34:56:78:90:ab"}
+    "
+  fi
+
+  usb="-usb -device usb-kbd -device usb-tablet -device usb-ehci,id=ehci -device nec-usb-xhci,id=xhci -global nec-usb-xhci.msi=off"
+
+  sata=0
+
+  mounts="-device ich9-ahci,id=sata
+    -drive id=EFI,if=none,file=$efi,format=raw
+    -device ide-hd,bus=sata.$(( ++sata )),drive=EFI,bootindex=$sata
+    -drive id=MacHDD,if=none,file=$root,format=raw
+    -device ide-hd,bus=sata.$(( ++sata )),drive=MacHDD,bootindex=$sata
+  "
+
+  [[ "$base" ]] && mounts+="
+    -drive id=BaseSystem,if=none,file=./BaseSystem.img,format=raw
+    -device ide-hd,bus=sata.$(( ++sata )),drive=BaseSystem
+  "
+
+  [[ "$disk" ]] && mounts+="
+    -drive id=Data,if=none,file=./$disk.img,format=raw
+    -device ide-hd,bus=sata.$(( ++sata )),drive=Data
+  "
+
+  [[ "$gpu" ]] && display="-vga none -device vfio-pci,host=$gpu,multifunction=on,x-no-kvm-intx=on" \
+    || display="-device vmware-svga" # -device VGA,vgamem_mb=256
+
+  [[ "$gpuaudio" ]] && audio="-device vfio-pci,host=$gpuaudio" \
+    || audio="-device ich9-intel-hda -device hda-duplex"
+
+  [[ "$ovmf" ]] || ovmf='/usr/share/ovmf/OVMF.fd' # ovmf='/usr/share/OVMF/OVMF_CODE.fd'
+
+  args="
+    -machine q35 -smbios type=2 -enable-kvm -m ${mem:-"8192"} -monitor stdio
+    -smp $cpus,cores=$cpus,sockets=1
+    -cpu $cpu,kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check
+    -drive if=pflash,format=raw,readonly=on,file=$ovmf
+    $display $audio $mounts $usb $net $smc
+  "
+  echo -e qemu-system-x86_64 ${args//'-'/'\n-'}'\n'
+  surely sure "boot macOS"
+  qemu-system-x86_64 $args
+}
+
+maco_${@:-"boot"}

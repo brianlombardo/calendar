@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+function weather { echo `curl -s https://wttr.in?format=%C%20%f | sed 's/.*/\L&/; s|[+]||g; s/.$//; s/  / /'`; }
+# weather
+cd "$HOME"
+if [[ ! -f '.weather' || "`find .weather -mmin +60`" ]]; then weather > .weather; fi
+cat .weather

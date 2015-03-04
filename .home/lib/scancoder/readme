@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# generate windows registry scancodemap
+#
+# 00000000    00000000     02000000    5be01de0           00000000
+# version     flags        count       orig + new code    null terminator
+#                             |
+#                 remap count + 1 (for null terminator)
+
+# from map of key codes
+scancoder 'example/changemap.json'
+
+# from default and modified qmk keymaps
+scancoder 'example/qmkoriginal.json' 'example/qmkremap.json'
+
+# from stdin
+echo '{
+  "esc": "`",
+  "`": "esc",
+  "lwin": "rcontrol",
+  "rcontrol": "lwin"
+}' | scancoder
+
+echo 'reg add "HKLM\SYSTEM\CurrentControlSet\Control\Keyboard Layout" /v "Scancode Map" /t REG_BINARY /f /d 00000000000000000500000001002900290001005be01de01de05be000000000'
+
+# reset scancode map
+echo '{}' | scancoder
+
+echo 'reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Keyboard Layout" /v "Scancode Map"'

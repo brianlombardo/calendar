@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+echo "extra-keys-style=all
+bell-character=ignore
+extra-keys=[[{key: '\`', popup: '~'}, {key: '-', popup: '|'}, {key: LEFT, popup: HOME}, {key: DOWN, popup: PGDN}, {key: UP, popup: PGUP}, {key: RIGHT, popup: END}], [ESC, {key: ':', popup: '>'}, {key: '/', popup: 'BACKSLASH'}, TAB, ALT, CTRL]]" > $HOME/.termux/termux.properties

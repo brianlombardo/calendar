@@ -1,0 +1,2 @@
+export gameid='622970'
+export serveCommand='./PavlovServer.sh -PORT=7777' # listen 7777, 8177 (400 + 7777), -KEY="$key"

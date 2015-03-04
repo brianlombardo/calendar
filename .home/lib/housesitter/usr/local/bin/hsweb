@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+screen -x housesitter && exit ||:
+npm i -g express
+screen -m -S housesitter hswebserver

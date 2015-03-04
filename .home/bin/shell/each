@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ ! "$2" ]]; then exit; fi
+
+op="$1" dothis="$2"; shift 2
+
+if [[ "$op" == 'map' ]]; then
+  items=("$@") result=''
+  for item in "${items[@]}"; do
+    result+="`$dothis $item` "
+  done
+  echo $result
+elif [[ "$op" == 'exec' ]]; then 
+  items=("$@")
+  for item in "${items[@]}"; do
+    $dothis $item
+  done
+elif [[ "$op" == 'eval' ]]; then  
+  eval "function dothis { $dothis; }"
+  items=("$@")
+  for item in "${items[@]}"; do
+    dothis $item
+  done
+elif [[ "$op" == 'line' ]]; then
+  while IFS=$'\n' read -r item; do 
+    $dothis $item
+  done <<< "$@"
+elif [[ "$op" == 'pipe' ]]; then
+  while IFS=$'\n' read -r item; do 
+    $dothis $item
+  done
+fi
+
+# function eachof {
+#   items=() dothis='' result=''
+
+#   while [[ "$1" ]]; do
+#     if [[ "$1" == 'do' ]]; then
+#       action="$1"; shift; break
+#     else
+#       items+=("$1"); shift
+#     fi
+#   done
+
+#   while [[ "$1" ]]; do dothis+="$1 "; shift; done
+
+#   [[ "$dothis" ]] && for item in "${items[@]}"; do
+#     $dothis $item
+#   done
+# }

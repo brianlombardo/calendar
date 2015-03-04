@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ -f '/dev/shm/hschatty' ]]; then
+  sudo mv /dev/shm/hschatty /dev/shm/hsquiet
+else
+  sudo touch /dev/shm/hsquiet
+fi
+
+/usr/local/bin/hsstop
+sleep 5
+/usr/local/bin/hsstart
+echo 'quietly ARMED!'

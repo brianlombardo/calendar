@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [[ "$1" == 'cron' ]]; then
+  crontab - <<<'*/15 * * * * /usr/local/bin/hsbeat'
+  exit
+fi
+
+source /etc/default/housesitter
+/usr/local/bin/hsslacker "`hostname`@`curl -s https://api.ipify.org`" "$BEAT_WEBHOOK" "$BEAT_CHANNEL"

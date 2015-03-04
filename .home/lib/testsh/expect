@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+function expect { # expected_value
+  expected="$1"
+  shift
+  $@
+}
+
+function to_equal { # actual_value
+  let ++runs
+  result="`$@`"
+  [[ "$result" == "$expected" ]] && echo "`parrot cyan pass:` '$@' is $result" && return
+  echo "`parrot magenta fail:` '$@' expected $expected but got $result"
+  let ++failures
+}
+
+function expect_success_from { # command
+  let ++runs
+  $@ > /dev/null 2>&1 && echo "`parrot cyan pass:` '$@' has zero exit code" && return
+  echo "`parrot magenta fail:` '$@' expected zero exit code"
+  let ++failures
+}
+
+function expect_failure_from { # command
+  let ++runs
+  $@ > /dev/null 2>&1 && echo "`parrot magenta fail:` '$@'  expected non-zero exit code" && let ++failures && return
+  echo "`parrot cyan pass:` '$@' has non-zero exit code"
+}
