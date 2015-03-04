@@ -1,0 +1,8 @@
+export gameid='740'
+export map='de_dust2'
+export port='27015'
+# casual:       +game_mode 0 +game_type 0
+# competitive:  +game_mode 0 +game_type 1
+# arms race:    +game_mode 1 +game_type 0
+# demolition:   +game_mode 1 +game_type 1
+export serverArgs='-usercon +maxplayers 10 +game_mode 0 +game_type 0 +mapgroup mg_active -tickrate 128'

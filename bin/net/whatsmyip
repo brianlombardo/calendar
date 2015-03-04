@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+if type dig &>/dev/null; then
+  dig @resolver1.opendns.com ANY myip.opendns.com +short
+elif type host &>/dev/null; then
+  host myip.opendns.com resolver1.opendns.com | tail -1 | $awk '{print $4}'
+else
+  echo "`curl -s https://api.ipify.org`"
+fi

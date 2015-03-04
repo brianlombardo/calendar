@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+set -e
+
+function dupefiles {
+  function dupefiles { sum="$1"; shift; dupe_file="$@"; }
+  while read dupe; do dupefiles $dupe
+    if [[ "$dupe_file" ]]; then echo "# rm -vf '`format $dupe_file`' # $sum"; fi
+  done <<< "`find "$dir" -type f -exec md5sum {} + | grep -v '^$' | sort | uniq -w32 -dD`"
+}
+
+function emptydirs {
+  while read empty; do
+    if [[ "$empty" ]]; then echo "# rm -rvf '`format $empty`' # empty"; fi
+  done <<< "`find "$dir" -depth -type d -empty | grep -v '^$'`"
+}
+
+function dupenames {
+  function excludes { while [[ "$1" ]]; do name="${name//"$1"/''}"; shift; done; }
+
+  function namekey {
+    basename "$name" | sed 's/[^a-zA-Z]//g' | $awk '{print tolower($0)}' | md5sum | $awk '{print $1}'
+  }
+
+  declare -A files
+  while read name; do
+    excludes mp3 m4a $exclude
+    files["`namekey`"]+="
+$name"
+  done <<< "`find "$dir" ! -empty -type f`"
+
+  for file_key in "${!files[@]}";do
+    values="`echo "${files[$file_key]}" | grep -v '^$'`"
+    value_count="`echo "$values" | wc -l`"
+    if (( value_count > 1 )); then
+      while read value; do
+        echo "# rm -vf '`format $value`' # $file_key"
+      done <<< "$values"
+    fi
+  done
+}
+
+function format { echo "${@//"'"/"'\"'\"'"}"; }
+
+if [[ "$1" ]]; then cd "$@"; fi; dir="`pwd`"
+echo; script=''
+if surely sure "# find duplicate files in '$dir'"; then
+  echo "# searching..."
+  print="`dupefiles`"
+  if [[ "$print" ]]; then print="# files\n$print\n"
+  else print='# zero files\n'; fi
+  echo -e "$print"
+  script+="$print"
+fi
+
+if surely sure "# find empties in '$dir'"; then
+  echo "# searching..."
+  print="`emptydirs`"
+  if [[ "$print" ]]; then print="# empties\n$print\n"
+  else print='# zero empties\n'; fi
+  echo -e "$print"
+  script+="$print"
+fi
+
+if surely sure "# find similar filenames in '$dir'"; then
+  echo "# searching..."
+  print="`dupenames`"
+  if [[ "$print" ]]; then print="# names\n$print\n"
+  else print='# zero names\n'; fi
+  echo -e "$print"
+  script+="$print"
+fi
+
+if surely sure '# save script'; then
+  echo -e "$script" > dupes.sh
+  surely=skip sheb ./dupes.sh
+  echo "script saved to `pwd`/dupes.sh"
+fi

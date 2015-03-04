@@ -1,0 +1,4 @@
+export gameid='232330'
+export map='de_dust2'
+export port='27016'
+export serverArgs='+maxplayers 10'

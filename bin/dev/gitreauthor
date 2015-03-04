@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ ! "$1" ]]; then
+  echo 'no email provided.'
+elif [[ ! -f "$HOME/.gitconfig" ]]; then
+  echo '~/.gitconfig not found.'
+else
+  gituser="`grep -A2 '\[user\]' "$HOME/.gitconfig" | tail -2`"
+  gituser="${gituser/  name = /}"
+  gituser="${gituser/  email = /}"
+  gitemail="`tail -1<<<"$gituser"`"
+  gituser="`head -1<<<"$gituser"`"
+
+  surely "replace commits from $1 with $gitemail($gituser)"
+  
+  git filter-branch -f --commit-filter "
+    if [[ \"\$GIT_AUTHOR_EMAIL\" == \"$1\" ]]; then
+      export GIT_AUTHOR_NAME=$gituser
+      export GIT_AUTHOR_EMAIL=$gitemail
+      export GIT_COMMITTER_NAME=$gitemail
+      export GIT_COMMITTER_EMAIL=$gitemail
+    fi; git commit-tree \"\$@\""
+fi

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set  -e
+
+hosts=( $@ 'https://winhelp2002.mvps.org/hosts.txt' )
+curl ${hosts[*]} \
+  | grep '^0\.0\.0\.0' \
+  | grep -o '^[^#]*' \
+  | sed -e 's/\r/\n/g' \
+  | sort \
+  | uniq

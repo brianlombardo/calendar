@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+[[ "$1" == '1' || "`to uppercase $1`" == 'YES' ]] && enable="YES"
+[[ "$1" == '0' || "`to uppercase $1`" == 'NO' ]] && enable="NO"
+[[ "$enable" ]] && sudo sysrc powerd_enable="$enable" && sudo /etc/rc.d/powerd onerestart
+
+sudo sysrc powerd_enable
+sysctl dev.cpu | grep 'freq:' | $awk '{print $2}'

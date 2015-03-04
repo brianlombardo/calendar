@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+[[ "$1" ]] && port="$1" && shift || port=${port:-'80'}
+[[ "$1" ]] && path="$1" && shift || path=${path:-'/'}
+[[ "$1" ]] && address="$1" && shift || address=${address:-'127.0.0.1'}
+[[ "$1" ]] && name="$1" && shift || name=${name:-'tranquilo.box'}
+
+[[ "$path" == '/' ]] && rewrite='' || rewrite="
+        rewrite ^$path?$ / break;"
+
+echo "
+# nginxcfg \\
+#   $port \\
+#   $path \\
+#   $address \\
+#   $name
+
+server {
+    listen $port;
+    server_name $name;
+
+    location $path { $rewrite
+        proxy_set_header   X-Forwarded-For \$remote_addr;
+        proxy_set_header   Host \$http_host;
+        proxy_pass         \"http://$address\";
+    }
+}
+"

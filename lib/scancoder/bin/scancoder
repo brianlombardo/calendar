@@ -1,0 +1,56 @@
+#!/usr/bin/env node
+
+const readFile = require('fs').readFileSync
+const keycodes = JSON.parse(readFile(`${__dirname}/../keycodemap.json`, 'utf8'))
+
+let changeMap = {}
+
+if (process.argv.length < 4) {
+  changeMap = JSON.parse(readFile(process.argv[2] ?? 0, 'utf8'))
+} else {
+  const baseKeymap = JSON.parse(readFile(process.argv[2], 'utf8')).layers[0]
+  const keymap = JSON.parse(readFile(process.argv[3], 'utf8')).layers[0]
+
+  if (keymap.length !== baseKeymap.length) {
+    console.error('input keymaps are not the same length')
+    return
+  }
+
+  for (let i = 0; i < keymap.length; ++i) {
+    if (keymap[i] !== baseKeymap[i]) {
+      changeMap[baseKeymap[i]] = keymap[i]
+    }
+  }
+}
+
+const changeMapKeys = Object.keys(changeMap)
+const changeMapLength = changeMapKeys.length
+
+if (changeMapLength === 0) {
+  console.log('reg delete "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout" /v "Scancode Map"')
+  return
+}
+
+let remaps = ''
+
+for (let i = 0; i < changeMapLength; ++i) {
+  const originalKey = changeMapKeys[i]
+  const remapKey = changeMap[originalKey].toUpperCase()
+  remaps = `${remaps}${keycodes[originalKey.toUpperCase()]}${keycodes[remapKey]}`
+}
+
+let count = (changeMapLength + 1).toString(16)
+
+if (count.length === 1) {
+  count = `0${count}`
+}
+const countZeros = 8 - count.length
+if (countZeros > 0) {
+  for (let i = 0; i < countZeros; ++i) {
+    count = `${count}0`
+  }
+}
+
+console.log(
+  `reg add "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout" /v "Scancode Map" /t REG_BINARY /f /d 0000000000000000${count}${remaps.toLowerCase()}00000000`
+)

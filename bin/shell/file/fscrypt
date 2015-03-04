@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -e
+
+function _mount {
+#  local mount="$1"
+#  local mapper="$2"
+#  local device="$3"
+#  sudo cryptsetup luksOpen $device $mapper
+#  sudo mount /dev/mapper/$mapper $mount
+  sudo udisksctl unlock -b "$1"
+  sudo udisksctl mount -b "$2"
+}
+
+function _unmount {
+#  local mount="$1"
+#  local mapper="$2"
+#  sudo umount $mount
+#  sudo cryptsetup luksClose $mapper
+  sudo udisksctl unmount -b "$2"
+  sudo udisksctl lock -b "$1"
+}
+
+function _emount {
+  ecryptfs-manager
+  ecryptfs-recover-private "${1:-/home}/.ecryptfs/${2:-$USER}/.Private"
+}
+
+_$@
+

@@ -1,0 +1,12 @@
+gameid='730'
+
+if [[ "$platform" == 'windows' ]]; then
+  serveCommand='cd ./game/bin/win64; ./cs.exe '
+else
+  serveCommand='cd ./game/bin/linuxsteamrt64; ./cs '
+fi
+
+serverArgs='-dedicated -port 27015 -maxplayers 10 +map de_dust2 +hostname Tranquilo +sv_lan 1 +sv_logfile 1 +game_alias competitive +sv_cheats 1'
+serveCommand+="$serverArgs"
+
+export gameid serveCommand serverArgs

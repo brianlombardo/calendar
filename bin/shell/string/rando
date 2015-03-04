@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+function _error_rando {
+  messages=( 'out of memory' 'file not found' 'runtime exception: stub' 'access denied' 'registry corrupted' 'permission denied' 'internal server error' 'segmentation fault' 'cyclical redundnacy check error' 'kernel panic' 'socket timeout' 'index out of bounds' 'bad gateway' 'bad message received' 'interrupted system call' 'operation not permitted' 'nil reference exception' 'null pointer exception' 'fatal device error' 'main thread locked' 'deadlock' 'invalid memory address' 'division by zero' 'tjunction temperature exceeded' 'wake failure' 'stack overflow' 'heap underflow' 'system compromised' 'invalid decrypt key' 'cpu governor locked' 'secure sandbox violation' 'break-in attempt detected' 'illegal operation' 'invalid instruction' 'bad cpu architecture: '`uname -m` 'chassis intrusion detected' 'kernel linker jettisoned' 'linker error' 'watchdog triggered' 'certificate expired' 'unknown host' 'integrity check failed' 'buffer overflow' )
+  size=${#messages[@]}
+  index=$((RANDOM%size))
+  echo "${messages[$index]}"
+}
+
+function _action_rando { rando verb adj noun; }
+
+function _name_rando { rando adj noun; }
+
+function _uuid_rando {
+  i=0 rando='' chars=({a..f} {0..9}) size=${#chars[@]}
+  while (( i < 36 )); do let ++i
+    if (( i == 9 || i == 14 || i == 19 || i == 24 )); then rando+='-'
+    else rando+=${chars[$((RANDOM%size))]}; fi
+  done
+  echo "$rando"
+}
+
+function _adj_rando { get_random_from \
+  'interpolated' 'triangular' 'triangulated' 'quadratic' 'quadrangular' 'linear' 'exponential' 'striped' 'referential' 'injected' 'mirrored' 'absolute' 'relative' 'fixed' 'floating' 'onboard' 'embedded' 'elevated' 'analog' 'thermal' 'living' 'hidden' 'insightful' 'artificial' 'fibonacci' 'authentic' 'nil' 'null' 'spicy' 'heated' 'external' 'upstream' 'downstream' 'related' 'unrelated' 'scripted' 'depleted' 'protected' 'unprotected' 'cyan' 'forward' 'angry' 'binding' 'bound' 'locked' 'unlocked' 'trigonometric' 'nondeterministic' 'deterministic' 'cooling' 'bezier' 'bazaar' 'optical' 'immense' 'square' 'fast' 'volatile' 'isothermal' 'insecure' 'iron' 'steel' 'crypto' 'cryptographic' 'shortest' 'oscillating' 'tense' 'adjacent' 'mechanical' 'electrical' 'simple' 'roaring' 'complete' 'incomplete' 'robust' 'shiny' 'unhandled' 'legal' 'predictable' 'unpredictable' 'folded' 'asymmetrical' 'symmetrical' 'factorial' 'bronze' 'silver' 'gold' 'platinum' 'universal' 'minty' 'trusted' 'quiet' 'archaic' 'linked' 'symbolic' 'contemporary' 'eager' 'sleeping' 'baked' 'raw' 'normalized' 'denormalized' 'iridescent' 'inflated' 'deflated' 'amped' 'shortest' 'free' 'radioactive' 'noisy' 'glossy' 'formal' 'informal' 'quantum' 'extra' 'terrestrial' 'local' 'delicious' 'bitter' 'cyan' 'mild' 'mute' 'basic' 'humane' 'horizontal' 'massive' 'vertical' 'actuated' 'reluctant' 'huge' 'ludicrous' 'silly' 'serious' 'realistic' 'unrealistic' 'broken' 'lost' 'big' 'pleasant' 'muffled' 'volumetric' 'charged' 'depleted' 'purple' 'pleasant' 'honest' 'closed' 'open' 'retro' 'retroactive' 'retrospective' 'refracted' 'reflected' 'future' 'decommissioned' 'medium' 'astral' 'aeronautical' 'nautical' 'airborne' 'complex' 'basic' 'repeated' 'redundant' 'congruent' 'parallel' 'rebuilt' 'built' 'clustered' 'caffeinated' 'express' 'plaid' 'sizzling' 'interior' 'coplanar' 'planar' 'efficient' 'orthographic' 'orthogonal' 'dithered' 'rendered' 'raytraced' 'realtime' 'delayed' 'blurred' 'sharp' 'pixelated' 'polygonal' 'forgiving' 'direct' 'severe' 'wide' 'fixed' 'kind' 'flat' 'round' 'wide' 'tall' 'obscure' 'intersected' 'punctuated' 'unicode' 'ascii' 'isometric' 'iso' 'hexadecimal' 'binary' 'observable' 'published' 'cybernetic' 'subscribed' 'random' 'constant' 'economic' 'unidimensional' 'multidimensional' 'unidirectional' 'qualified' 'ephemeral' 'normal' 'vaulted' 'fleeting' 'recorded' 'saved' 'transformed' 'restored' 'calculated' 'reversed' 'transposed' 'proportional' 'internal' 'external' 'orbital' 'scaled'
+}
+
+function _noun_rando { get_random_from \
+  'clover' 'data' 'handler' 'watchdog' 'transformer' 'scale' 'resource' 'asset' 'skeleton' 'coffee' 'tea' 'cake' 'pie' 'pointer' 'pipeline' 'firmware' 'hardware' 'gradient' 'parallax' 'phalanx' 'software' 'document' 'throughput' 'volume' 'media' 'panic' 'shortcut' 'license' 'administrator' 'superuser' 'path' 'spline' 'raster' 'vector' 'bitmap' 'governor' 'mutex' 'semaphore' 'concurrency' 'intelligence' 'cluster' 'defense' 'expression' 'function' 'projection' 'rollback' 'defect' 'exception' 'error' 'message' 'forecast' 'supply' 'inventory' 'mission' 'signal' 'housing' 'kerning' 'diameter' 'circumference' 'leading' 'server' 'calculus' 'client' 'derivative' 'curve' 'gateway' 'mesh' 'market' 'coordinate' 'texture' 'enclave' 'map' 'heap' 'stack' 'stacktrace' 'heapdump' 'loop' 'shape' 'prism' 'manifold' 'graph' 'sentry' 'portal' 'kernel' 'microkernel' 'scout' 'dragon' 'llama' 'segment' 'chroot' 'wall' 'dataset' 'solenoid' 'unicorn' 'dagger' 'limiter' 'commander' 'slider' 'section' 'snippet' 'linkage' 'linker' 'compiler' 'output' 'certificate' 'key' 'input' 'stream' 'template' 'platform' 'module' 'apprentice' 'firewall' 'skynet' 'blockchain' 'ledger' 'blocknet' 'icon' 'scene' 'boundary' 'base' 'angle' 'contingency' 'object' 'structure' 'user' 'singleton' 'algorithm' 'routine' 'coroutine' 'reflection' 'integrator' 'spike' 'assignment' 'blueprint' 'height' 'bucket' 'matrix' 'pulse' 'schema' 'agreement' 'bit' 'centroid' 'interface' 'namespace' 'geolocation' 'storage' 'protocol' 'implementation' 'taxonomy' 'table' 'turntable' 'keyboard' 'jumper' 'sink' 'chassis' 'log' 'file' 'enclosure' 'domicile' 'margin' 'overflow' 'excess' 'backlog' 'backpressure' 'export' 'vertex' 'facet' 'polygon' 'glass' 'metal' 'simulation' 'subject' 'surface' 'synthwave' 'gate' 'voltage' 'circuit' 'controller' 'checksum' 'shebang' 'database' 'container' 'bucket' 'proxy' 'simulation' 'agent' 'daemon' 'service' 'designer' 'buffer' 'cache' 'hashtag' 'hash' 'hashmap' 'list' 'library' 'storyboard' 'antialiasing' 'macro' 'frame' 'datagram' 'framework' 'view' 'presenter' 'repository' 'inbox' 'cubit' 'application' 'activity' 'thread' 'process' 'workflow' 'fragment' 'provider' 'summary' 'opacity' 'transparency' 'executable' 'package' 'artifact' 'dependency' 'receiver' 'redux' 'unit' 'method' 'grid' 'cycle' 'violation' 'monad' 'value' 'redundancy' 'randomness' 'integrity' 'scalar' 'variable' 'strategy' 'scaffolding' 'neighbor' 'duct' 'calculation' 'registry' 'permission' 'exoskeleton' 'sandbox' 'instruction' 'architecture' 'host' 'warehouse' 'flare' 'clock'
+}
+
+function _verb_rando { get_random_from \
+  'optimize' 'debounce' 'bump' 'navigate' 'interleave' 'interlace' 'push' 'format' 'parallelize' 'adapt' 'increment' 'decrement' 'iterate' 'deallocate' 'allocate' 'orchestrate' 'pull' 'throttle' 'flash' 'formulate' 'improve' 'upgrade' 'copy' 'obscure' 'reveal' 'reduce' 'downgrade' 'enhance' 'locate' 'annotate' 'mark' 'wipe' 'fade' 'shield' 'debrief' 'disentangle' 'consolidate' 'guard' 'eliminate' 'fix' 'break' 'integrate' 'crash' 'throw' 'chuck' 'add' 'remove' 'solve' 'return' 'create' 'contribute' 'generate' 'destroy' 'concoct' 'imagine' 'attempt' 'sign' 'design' 'architect' 'deprecate' 'obfuscate' 'secure' 'encrypt' 'seed' 'reticulate' 'mock' 'fake' 'articulate' 'test' 'analyze' 'probe' 'prescribe' 'document' 'preserve' 'archive' 'delete' 'save' 'overwrite' 'lose' 'loosen' 'launch' 'jettison' 'unwrap' 'wrap' 'tighten' 'crush' 'expand' 'emit' 'compute' 'calculate' 'unblock' 'promote' 'demote' 'await' 'block' 'persist' 'prototype' 'listen' 'inscribe' 'clear' 'fill' 'fragment' 'refactor' 'flush' 'simulate' 'emulate' 'reproduce' 'produce' 'clone' 'commit' 'shade' 'charge' 'subtract' 'multiply' 'subdivide' 'bisect' 'duplicate' 'bottle' 'shock' 'suppress' 'fork' 'model' 'restore' 'revert' 'switch' 'swap' 'collate' 'collect' 'accumulate' 'find' 'submit' 'mangle' 'assemble' 'disassemble' 'decompile' 'compile' 'execute' 'access' 'sandbox' 'rotate' 'translate' 'transpile' 'transform' 'scale' 'blend' 'exercise' 'regenerate' 'recreate' 'detach' 'rebase' 'dereference' 'merge' 'release' 'fetch' 'query' 'overclock' 'underclock' 'curry' 'backtrack' 'lift' 'drop' 'clobber' 'derandomize' 'randomize' 'flatten' 'force' 'accommodate' 'modularize' 'debug' 'attach' 'vault' 'adjust' 'tune' 'readjust' 'hide' 'show' 'read' 'dump' 'interpolate' 'extrapolate' 'conclude' 'decrypt' 'contain' 'jailbreak'
+}
+
+function _str_rando {
+  chars=({a..z} {A..Z} {0..9})
+  get_rando_chars
+}
+
+function _num_rando {
+  chars=({0..9})
+  get_rando_chars
+}
+
+function get_random_from {
+  list=( "$@" )
+  list_size=${#list[@]}
+  index=$((RANDOM%list_size))
+  echo "${list[$index]}"
+}
+
+function get_rando_chars {
+  i=0 rando=''
+  list_size=${#chars[@]}
+  while (( i < ${rando_size:-16} )); do let ++i
+    rando+=${chars[$((RANDOM%list_size))]}
+  done
+  echo "$rando"
+}
+
+function rando {
+  if [[ "$1" ]]; then randoms=''
+    if [[ "$S" == false ]]; then separator=''
+    else separator="${S:- }"; fi
+    while [[ "$1" ]]; do
+      if [[ "$1" == 'size' ]]; then rando_size="$2"; shift 2
+      else
+        [[ "$randoms" ]] && randoms+="$separator"
+        randoms+="`_${1}_rando`"; shift
+      fi
+    done
+    echo -e ${randoms//' '/"$separator"}
+  else
+    _str_rando
+  fi
+}
+
+rando $@

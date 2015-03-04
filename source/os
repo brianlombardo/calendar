@@ -1,0 +1,49 @@
+alias whereami="echo $whereami"
+
+if [[ "$whereami" == 'android' ]]; then
+  export packages='vim git tmux screen which build-essential openssh'
+elif [[ "$whereami" == 'darwin' ]]; then
+  export packages='bash zsh vim git tmux coreutils gnu-sed watch bash-completion zsh-completion screen gpg qemu bat lolcat openssl'
+  export packages_apps='visual-studio-code iterm2 slack discord qmk/qmk/qmk homebrew/cask-drivers/qmk-toolbox jetbrains-toolbox utm'
+  alias app='open -a'
+  alias disk_unlock_by_uuid='diskutil apfs unlockVolume'
+  alias fmy='open /System/Applications/FindMy.app;'
+  alias imsg='open /System/Applications/Messages.app;'
+  alias qmkt='app "QMK Toolbox";'
+  alias slk='app Slack;'
+  alias simulatorwipe='fastlane snapshot reset_simulators;'
+  alias screensave='app ScreenSaverEngine.app;'
+  alias xcodeinit='sudo xcode-select -s /Applications/Xcode.app/Contents/Developer'
+  alias ip='ipcmd=ifconfig ipcmd'
+  alias rdp='app "Microsoft Remote Desktop";'
+  alias filevaultrm='surely "remove user from filevault" && sudo fdesetup remove -user'
+  alias smc='sudo powermetrics --samplers smc'
+  alias rosetta_install='softwareupdate --install-rosetta'
+  include /opt/homebrew/bin \
+    /opt/homebrew/opt/coreutils/libexec/gnubin \
+    /usr/local/opt/coreutils/libexec/gnubin \
+    /opt/homebrew/opt/gnu-sed/libexec/gnubin \
+    /opt/homebrew/opt/grep/libexec/gnubin
+elif [[ "$whereami" == 'freebsd' ]]; then
+  export packages='vim git xorg xrdp xfce gnu-watch sudo screen coreutils date'
+  alias ip='ipcmd=ifconfig ipcmd'
+elif [[ "$whereami" == 'linux' ]]; then
+  export packages='bash zsh vim git tmux build-essential screen gpg $awk cmus iftop bat lolcat'
+  export packages_apps='qemu qemu-kvm ioquake3-server steam-installer lm-sensors blender gimp xfce4 blackbox blackbox-themes xterm'
+elif [[ "$whereami" == 'windows' ]]; then
+  export packages='rsync gcc procps-ng diffutils unzip zip mingw-w64-ucrt-x86_64-bat'
+  export appdata="`cygpath $APPDATA`"
+  export localappdata="`cygpath $LOCALAPPDATA`"
+  export psh_history="$appdata/Microsoft/Windows/PowerShell/PSReadLine/ConsoleHost_history.txt"
+  alias sudo=''
+  alias slk='secretly "$LOCALAPPDATA/slack/slack.exe"'
+  alias winvars='rundll32 sysdm.cpl,EditEnvironmentVariables'
+  alias hypervset='bcdedit -set hypervisorlaunchtype' # auto
+  alias ip='ipcmd="ipconfig.exe -all" ipcmd'
+  # include /c/Windows/system32 \
+  #   /c/Windows \
+  #   /c/Windows/System32/Wbem \
+  #   /c/Windows/System32/WindowsPowerShell/v1.0 \
+  #   /c/Windows/System32/OpenSSH
+  export PATH="/usr/bin:$PATH"
+fi

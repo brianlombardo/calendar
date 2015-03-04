@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+function zipTarget {
+  quietly "zip -r $1.zip $1" && echo "$1 zipped" || echo "$1 zip failed"
+}
+export -f zipTarget
+each exec zipTarget $@

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+search="$@"
+search="${search//'#'/'%23'}"
+search="${search//' '/'%20'}"
+open "https://tracker.gg/valorant/profile/riot/$search"

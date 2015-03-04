@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+if [[ -f '/dev/shm/hsquiet' ]]; then
+  sudo mv /dev/shm/hsquiet /dev/shm/hschatty
+else
+  sudo touch /dev/shm/hschatty
+fi
+
+if pidof motion; then
+  /usr/local/bin/hsstop
+else
+  /usr/local/bin/hsstart
+fi

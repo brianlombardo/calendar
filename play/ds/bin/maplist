@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+[[ ! "$1" ]] && exit 1 || game="$1"
+
+cd "$DS_HOME/$game/$game/maps"
+maps=`ls *.bsp`
+echo "${maps//.bsp/}"

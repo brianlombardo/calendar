@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+quietly 'tmux a' && exit
+
+muxoptions="set-option -g status-bg $PROMPT_ACCENT\; set-option -g pane-border-style fg=$PROMPT_ACCENT\; set-option -g pane-active-border-style fg=$PROMPT_ACCENT\; set-option -g status-right '%m/%d/%y %H:%M'"
+
+if [[ "$1" == 'init' ]]; then
+  echo -e "${muxoptions//'\; '/'\n'}" > "$HOME/.tmux.conf" && echo 'conf saved.'
+elif [[ "$1" == 'single' ]]; then shift; command="$@"
+  bash -c "tmux new-session \"$command\"\; $muxoptions"
+elif [[ "$1" == 'triple' ]]; then
+  session="tmux new-session '$2' \; split-window '$3' \; select-layout even-horizontal \; split-window '$4' \; $muxoptions"
+  bash -c "$session"
+elif [[ "$1" ]]; then
+  session="tmux new-session \"$1\"\;"
+  is odd "$#" && split="split-window\;"
+  [[ $3 ]] && layout='tiled' || layout="even-horizontal"; shift
+  function splitCommand { echo "$session split-window \"$@\"\;"; }; export -f splitCommand
+  bash -c "$session `each map splitCommand "$@"` $split select-layout $layout\; $muxoptions"
+else
+  bash -c "tmux new-session\; $muxoptions"
+fi

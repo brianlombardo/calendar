@@ -1,0 +1,8 @@
+#!/usr/bin/env groovy
+
+System.in.withReader { lines ->
+  lines.eachLine { line ->
+    println "$line"
+  }
+}
+args.each { println it }

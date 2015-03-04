@@ -1,0 +1,1 @@
+export PATH="$DS_HOME/bin:$PATH"

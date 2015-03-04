@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# create a basic HTTP/REST server from JSON
+
+./easyserv # server.json

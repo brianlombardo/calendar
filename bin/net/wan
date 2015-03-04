@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+if [[ "$skip" == 'true' ]]; then exit; fi
+if [[ ! "$URL" ]]; then
+  URL="${GHUB_URL:-"https://github.com"}"
+fi
+
+URL="${URL//'https://'/''}"
+
+if pingonce -q "$URL"; then
+  echo 'connected'
+else
+  echo 'disconnected'; exit 1
+fi

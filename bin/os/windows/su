@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+cd "$( realpath "$(dirname "${BASH_SOURCE[0]}")" )"
+
+[[ "$1" == '-' ]] && shift
+sudoer="$1"; shift
+[[ "$1" == '-c' ]] && shift
+
+if [[ "$1" ]]; then command="$@"
+else
+  command="`cygpath -d /usr/bin/mintty.exe` -t $sudoer -- /usr/bin/bash -l"
+fi
+
+if [[ "$sudoer" && "$command" ]]; then start su.bat "$sudoer" "$command"; fi
+
+wait=yes; while [[ "$wait" ]]; do read -s wait; done

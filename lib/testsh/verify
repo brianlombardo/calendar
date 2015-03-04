@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+function verify { when "$@"; } # command
+
+function is_called_with { # 'arguments'
+  receives "$1"
+  shift
+  is_called $@
+}
+
+function is_called { # n times
+  [[ "$2" == 'time' || "$2" == 'times' ]] && targetCount="$1" || targetCount='1'
+
+  export unverifiedReceivers="$receiver $unverifiedReceivers"
+  
+  _build "
+    export count_$receiver=0"
+  _build_receiver "
+      let ++count_$receiver
+      if [[ '$targetCount' == \"\$count_$receiver\" ]]; then
+        export unverifiedReceivers=\${unverifiedReceivers//$receiver/}
+      elif [[ \$unverifiedReceivers != *'$receiver'* ]]; then
+        export unverifiedReceivers=\"\$unverifiedReceivers $receiver\"
+      fi"
+}
+
+function expect_verification_from { # command arguments
+  _inject_mocks_and_call $@
+  let ++runs
+  if [[ ! ${unverifiedReceivers// /} ]]; then
+    echo "`parrot cyan pass:` '$testCall' succeeded"
+  else
+    echo "`parrot magenta fail:` '$testCall'";
+    local rec receivers=($unverifiedReceivers)
+    for rec in "${receivers[@]}"; do
+      echo "`parrot magenta +` `error_$rec`";
+    done
+    let ++failures
+  fi
+  _reset_mocks
+}
+
+function _inject_mocks_and_call {
+  testCall="$@"
+  local call=$1
+  local callBody="`_get_call_body $call`"
+  shift
+  [[ "`type -t $call`" == 'function' ]] || _build "
+    # implementation: $call
+    function $call {
+# start $call script
+$callBody
+# end $call script
+    }; "
+  _build "
+    $call $@"
+}
+
+function _get_call_body {
+  local callType="`type -t $1`"
+  [[ "$callType" == 'function' ]] && echo "# `type $1`" && return
+  [[ "$callType" == 'file' ]] && grep -v 'set -\|#!/usr/bin/env' `which "$1"` && return
+  return 1
+}
+
+function _reset_mocks {
+  unset -f $funs
+  unset funs unverifiedReceivers
+}

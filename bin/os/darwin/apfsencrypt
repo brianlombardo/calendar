@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [[ "$1" ]]; then
+  sudo diskutil apfs encryptvolume "/dev/disk${1/\/dev\/disk}" -user disk
+elif diskutil apfs list|grep 'Encryption Progress'; then :
+else
+  echo 'no disks to encrypt'
+fi

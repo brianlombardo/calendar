@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+source "$HOMETEST/expect"
+
+expect 3.1416 to_equal round '4 3.14159'
+expect 3.142 to_equal round '3 3.14159'
+expect 3 to_equal round '0 3.14159'
+
+expect 1080 to_equal proportion 16 1920 9
+expect 200 to_equal proportion 5 1 1000
+expect 999mi to_equal proportion 13gal 333mi 39gal
+expect 1279.02 to_equal proportion 123x 345y 456z
+
+expect 1234.578 to_equal value 1,234.578π
+expect 'π' to_equal unit '1,234.578π'
+expect 1234.578 to_equal value 1,234.578m
+expect m to_equal unit '1,234.578m'
+expect '54321' to_equal value '54321f12345'
+expect 'f12345' to_equal unit '54321f12345'
+expect 'm/s/s' to_equal unit '1,234.578m/s/s'
+expect 1234.578 to_equal value '1,234.578m^2'
+expect 'm^2' to_equal unit '1,234.578m^2'
+expect '°F' to_equal unit '-1,234.578270°F'
+expect '-1234.5678270' to_equal value '-1,234.5678270°F'
+
+expect 4.71239rad to_equal conv 270deg rad
+expect 4.71239rad to_equal conv 270° rad
+
+expect 1.5pi to_equal conv 270deg pi
+expect 1.5π to_equal conv 270° π
+
+expect 270deg to_equal conv 4.71239rad deg
+expect 270° to_equal conv 1.5π °
+expect π to_equal conv 180° π
+
+expect 37.7778C to_equal conv 100F C
+expect -17.7778C to_equal conv 0F C
+expect 71.6F to_equal conv 22C F
+expect 140F to_equal conv 60C F
+expect 100°C to_equal conv 212°F °C
+expect 212F to_equal conv 100C F
+expect 212°F to_equal conv 100°C °F
+
+expect 6.43736km to_equal conv 4mi km
+expect 21120ft to_equal conv 4mi ft
+
+expect 3.10685mi to_equal conv 5km mi
+expect 5000m to_equal conv 5km m
+
+expect 1.234km to_equal conv 1234m km
+expect 1350yd to_equal conv 1234m yd
+expect 13.1234ft to_equal conv 4m ft
+expect 400cm to_equal conv 4m cm
+expect 4000mm to_equal conv 4m mm
+
+expect 3.6576m to_equal conv 4yd m
+expect 12ft to_equal conv 4yd ft
+expect 144in to_equal conv 4yd in
+
+expect 1.89394mi to_equal conv 10000ft mi
+expect 3.9624m to_equal conv 13ft m
+expect 4.33333yd to_equal conv 13ft yd
+
+expect 2.54cm to_equal conv 1in cm
+expect 25.4mm to_equal conv 1in mm
+
+expect 14.1732in to_equal conv 36cm in
+
+expect 1in to_equal conv 25.4mm in
+expect 2.54cm to_equal conv 25.4mm cm
+
+expect 2hr to_equal conv 120min hr
+expect 120min to_equal conv 2hr min

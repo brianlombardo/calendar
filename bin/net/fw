@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set  -e
+
+function _firewall_linux { local op="${1:-s}"
+  if [[ "$op" =~ ^s(tatus)?$ ]]; then op='status numbered'
+  elif [[ "$op" =~ ^r(ez)?$ ]]; then op='reload'
+  elif [[ "$op" =~ ^up?$ ]]; then op='enable'
+  elif [[ "$op" =~ ^d(own)?$ ]]; then op='disable'
+  elif [[ "$op" =~ ^e(dit)?$ ]]; then sudo vim /etc/ufw/before.rules; exit
+  elif [[ "$op" =~ ^l(og)?$ ]]; then cat /var/log/ufw.log; exit
+  else op="$@"; fi
+  sudo ufw $op
+}
+
+function _firewall_bsd {
+  sudo pfctl $@
+}
+
+_firewall_$whereami $@

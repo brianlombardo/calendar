@@ -1,0 +1,4 @@
+#!/usr/bin/env swift
+
+while let line = readLine() { print(line) }
+for arg in CommandLine.arguments.dropFirst() { print(arg) }

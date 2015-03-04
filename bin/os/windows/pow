@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+function getprofile { powercfg -list | grep ') \*' | grep -o '(.*)' | sed -e 's/(\|)//g'; }
+
+current="`getprofile`"
+previous="$current"
+[[ "$1" ]] && \
+  powercfg -setactive "`powercfg -list | grep -i "$1" | $awk '{print $4}'`" > /dev/null 2>&1 &&\
+  current="`getprofile`"
+[[ "$previous" != "$current" ]] && echo "$previous -> $current" || echo "$current"

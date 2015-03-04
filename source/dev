@@ -1,0 +1,57 @@
+function pro { [[ "$workspace" ]] || local workspace="$PROJECTS"
+  mkdir -p "$workspace" && cd "$workspace" || return 1
+  if [[ "$1" == 'clone' && "$2" ]]; then local repo="$2"; shift 2
+    git clone "$repo" $@ || return 1; repo="${repo##*/}"; repo="${repo//.git/}"
+    [[ -d "$repo" ]] && cd "$repo"
+  else local target="`find . -maxdepth 2 -type d -not -path '*/.*' \
+       | grep -E "${1//\//.*/}" | head -1`"
+    if [[ ! -d "$target" ]]; then echo "$1 not found."; return 1; fi
+    cd "$target"; [[ "$2" ]] && shift && $@ .
+  fi
+}; alias prolib='workspace="$DOTHOME/projects" pro'
+
+function adbdev {
+  if [[ "$1" ]]; then local device="`adbb ls | grep -iE "$1" | head -1`"
+    if [[ "$device" ]]; then export ANDROID_SERIAL="$device"
+    else echo "no matching device: $1"; fi
+  fi
+  echo "ANDROID_SERIAL=$ANDROID_SERIAL"
+}
+
+function pyenv {
+  if [[ ! -d '.venv' ]]; then python3 -m venv .venv; fi
+  source .venv/bin/activate
+}
+
+function gci { local message="$@"; git commit -m"$message"; }
+alias gs='git status' gsa='gs --ignored'
+alias gp='git push origin HEAD -u' gup='git pull --rebase'
+alias gcia='git add -A; gci'
+alias gco='git checkout'
+
+alias binsymbols='nm -gDC'
+alias fastbroot='sudo "$ANDROID_HOME/platform-tools/fastboot"'
+alias virtinit='pkg i virt-manager && sudo usermod -aG libvirt $USER'
+alias rad='./gradlew'
+alias mockitoinit='cd ./test && mkdir -p ./resources/mockito-extensions && echo 'mock-maker-inline' > ./resources/mockito-extensions/org.mockito.plugins.MockMaker'
+alias emu='adbb emu'
+alias json='python3 -m json.tool'
+alias jsonprint='json | bat --language javascript'
+
+alias rustupup="curl --proto '=https' --tlsv1.2 -sSf 'https://sh.rustup.rs' | sh;"
+alias sdkmanup='curl -s "https://get.sdkman.io" | bash;'
+alias nvmup='curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash;'
+
+alias flutterup='surely "install flutter ${flutter_version:-stable}" && cd && \
+  rm -fr .pub-cache .flutter .flutter-devtools .dart .dartServer "$HOMELIB/flutter" && \
+  cd "$HOMELIB" && git clone https://github.com/flutter/flutter.git && cd flutter && \
+  git checkout "${flutter_version:-stable}" && bin/flutter doctor'
+alias fpg='flutter pub get;'
+alias fpup='flutter pub upgrade;'
+alias ftest='flutter test;'
+
+alias mul='clac mul' add='clac add' sub='clac sub' div='clac div' avg='clac avg'
+
+alias agile="echo -e '\n+ individuals and interactions over processes and tools\n+ working software over comprehensive documentation\n+ customer collaboration over contract negotiation\n+ responding to change over following a plan\n\n+ our highest priority is to satisfy the customer through the early and continuous delivery of valuable software\n+ welcome changing requirements, even late in development\n  + agile processes harness change for the customer’s competitive advantage\n+ deliver working software frequently, from a couple of weeks to a couple of months, with a preference to the shorter timescale\n+ business people and developers must work together daily throughout the project\n+ build projects around motivated individuals\n  + give them the environment and support they need, and trust them to get the job done\n+ the most efficient and effective method of conveying information to and within a development team is face-to-face conversation\n+ working software is the primary measure of progress\n+ agile processes promote sustainable development\n  + the sponsors, developers, and users should be able to maintain a constant pace indefinitely\n+ continuous attention to technical excellence and good design enhances agility\n+ simplicity–the art of maximizing the amount of work not done–is essential\n+ the best architectures, requirements, and designs emerge from self-organizing teams\n+ at regular intervals, the team reflects on how to become more effective, then tunes and adjusts its behavior accordingly\n';"
+alias osi="echo -e '\n# open systems interconnection model\n\n+ application - end user layer, eg. http, ftp, dns, ssh\n+ presentation - syntax/format, eg. encryption, compression\n+ session - connection between endpoints, eg. sync and send to ports, sockets\n+ transport - proto tcp/udp\n+ network - logical/ip address, path/route, packets\n+ data link - physical/mac address, frames\n+ physical - raw bit stream\n';"
+alias wumpus="echo \"\n# Cultivate Belonging\n+ Take the time to get to know people and find common ground\n+ Remember that we are all working towards the same goal\n+ Start from a place of trust, assume good intent, and seek to understand other points of view before passing judgment\n\n# Deliver for Customers\n+ Deliver solutions that meet the needs of the people we serve\n+ Strive to deeply understand how what you are working on helps customers from first principles and invent creative approaches to meet them\n+ Focus on their needs, not what the competition is doing\n\n# Surprise & Delight\n+ Surprise & delight comes from caring about the million little details of how a person experiences your work\n+ Put the right emotion in when they least expect it to deliver the magic\n+ This applies to how we show up with each other too!\n\n# Debate, Decide, Commit\n+ When you own a decision, involve your stakeholders, get informed through data, have constructive debates, and make a decision\n+ When you are part of a decision or when you aren't, share your thoughts respectfully\n+ When a decision is made, regardless of whether you agree with it, commit to bringing it to life with excellence\n+ Transparency is our goal, not consensus\n\n# Progress Over Perfection\n+ All big things start small\n+ Think long-term and break ideas down so you can start delivering value and learning right away\n+ Strive for an 80/20 approach and compound from there\n+ This is the essence of moving fast with both excellence and surprise & delight\n\n# Embrace the Brutal Facts\n+ Take risks (big and small) to do things that matter and don't be afraid to change directions based on what you learn\n+ Inspect reality — using data when you can — to determine whether it is working or not\n+ If it's working, keep going\n+ When it's not, don't be afraid to cut your losses\n+ Always learn what went right and wrong to do better next time\n\n# Strive for Excellence\n+ Seize the opportunity to do incredible work that you can be proud of every single day\n+ Learn more, ask questions, improve yourself, improve our company, and help those around you reach their maximum potential\n\""

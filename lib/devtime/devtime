@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+set -e
+
+export awk="${awk:-gawk}" devtimesh="$0"
+work_hours=40 work_hours_per_day=8 # WARNING: increase may cause side effects
+dt_home="${DEVTIME:-$HOME/.devtime}" log_date=`date '+%Y.%m.%d'`; log_file="./$log_date.md"
+mkdir -p "$dt_home" && cd "$dt_home"
+function _dt_- { _dt_up
+  if is_afk; then echo 'currently afk'
+  elif task_started; then write_log "${indent:-  }${bullet:--} $@"
+  else echo 'task not yet started'; fi
+}
+function _dt_+ { _dt_up
+  if task_started; then task_end $1; fi
+  local start=`new_start $1`; if is_time "$1"; then shift; fi
+  task_start $start $@
+}; _dt_... () { _dt_+ $@; }
+function _dt_gg { _dt_up
+  if is_eod; then echo 'day already ended'
+  elif ! task_started && ! task_ended; then echo 'no tasks'
+  else { if task_started; then task_end $1; fi }
+    write_log "# `new_start` `tasks_hours` hours"
+  fi
+}
+function _dt_shell { _dt_up
+  trap t INT;t()(tmux kill-session); local p=`printf '\e[0;95m>\e[0;67m '` in=
+  until [[ "$in" =~ ^/q(uit)?$|^qq$ ]]; do if [[ ! "$in" ]]; then :
+    elif [[ "$in" == '/'* ]]; then $0 ${in/'/'/} ||:
+    elif [[ "$in" == '--'* ]]; then $0 indent $in
+    elif [[ "$in" == '?'* || "$in" == '#' || "$in" == '##' || "$in" == '###' || "$in" == '... '* \
+      || "$in" == '+ '*  || "$in" == 'gg'* || "$in" == 'pop'* ]]; then $0 $in
+    else $0 - $in; fi; read -rep "$p" in
+  done; _dt_up; t
+}
+function task_start { local time="$1"; shift
+  if [[ "$1" ]]; then revert_gg; write_log "+ $time $@"
+  else echo 'no task name provided'; fi
+}
+function task_end {
+  if task_ended; then echo 'task already ended'
+  elif ! task_started; then echo 'task not yet started'
+  else write_log "  + `task_hours $1` hours"; fi
+}
+function _dt_stats { local hours=`hours $log_file | add $( if ! is_afk; then task_hours; fi )`
+  local total=$( for (( day=`date +%u`; day>0; --day )); do hours "`date +%Y.%m.%d -d -${day}days`.md"; done | add $hours | round )
+  local total_left=`$awk '{print $1-$2}'<<<"$work_hours $total"`
+  echo "# $hours hours, $total total, $total_left left`is_eod || echo ", $(eod $hours $total_left) eod"`"
+}
+function add_log_hours (
+  while read log; do head -1 "$log" | grep '^# .*day$'
+    hours=$( grep '^+\|^  +' "$log" | grep '^  + [0-9].* hours' -B1 | while read item; do
+      if [[ ! "$cat" ]]; then cat="`$awk '{$1="";$2="";print $0}' <<< "$item"`"
+      else $awk '{$1="";$3="";print $0}' <<< "$item $cat" | xargs; cat=; fi
+    done )
+    grep '^+ ' "$log" | $awk '{$1="";$2="";print $0}' | sort | uniq | while read cat; do echo "+ ${cat}"
+      echo "$hours" | grep "[0-9] $cat$" | $awk '{print $1}' | add | $awk '{print "  + "$1" hours"}'
+    done
+    tail -1 "$log" | grep '^# .*hours$' | gawk '{$2="";print $0}' | xargs
+    echo
+  done
+)
+function _dt_mux { tmux a > /dev/null 2>&1 || tmux new-session "$devtimesh watch" \; split-window "$devtimesh shell" \; select-layout even-horizontal \; set-option -g status-bg cyan\; set-option -g pane-border-style fg=cyan\; set-option -g pane-active-border-style fg=cyan\; set-option -g status-right '%m/%d/%y %H:%M'\;; }
+function _dt_up { if [[ ! -d '.git' ]]; then :; elif git status | grep 'nothing to commit' &>/dev/null; then git pull &>/dev/null; else local m="${@:-`date`}"; ( git pull && git add -A && git commit -m "$m" && git push origin HEAD -u ) &>/dev/null || echo 'repo update failed'; fi; }
+function _dt_print { (_dt_stats && _dt_quests && log_exists && cat "$log_file") | tags | _dt_format; }
+function _dt_watch { watch -tcn3 $0 print; }
+function _dt_tasks { ls [0-9][0-9][0-9][0-9].[0-9][0-9].[0-9][0-9].md | add_log_hours | _dt_format; } # | less -R +G
+function _dt_# ( vim '+normal G' "$log_file"; _dt_up )
+function _dt_## ( vim "$dt_home"; _dt_up )
+function _dt_### ( if [[ -f "$log_file" ]]; then l="$log_file"; else l=; fi; if type code &>/dev/null; then code "$dt_home" "$l" &>/dev/null; else _dt_##; fi )
+function _dt_pop { if tail -1 "$log_file" | grep -E '^  .*$|^#.*hours$|^\+ .*$' | GREP_COLORS='ms=9' grep --color=always '^.*$'; then pop; { if [[ "$1" == 'pop' ]]; then shift; _dt_pop $@; else _dt_up pop; fi; } fi; }
+function _dt_forever (( d=`lslogs 2>/dev/null | wc -l` p='{print "# "$1" hours, "$days" days, "$1/$days" average"}'; lslogs 2>/dev/null | while read l; do hours "$l"; done | add | $awk "${p//'$days'/$d}" 2>/dev/null || echo '# 0 days' ) | _dt_format )
+function _dt_quests { lslogs &> /dev/null || return; local q="`cat *.md | grep '  \* ' | tac`"; if [[ "$q" ]]; then q="${q//  /}";echo -e "\n* quests\n${q//'*'/  '*'}"; fi; echo -e ' '; }
+function _dt_tag { if [[ "$1" ]]; then while [[ "$1" ]]; do echo "$1" >> .tags; shift; done; else vim .tags; fi; _dt_up tags; }
+function _dt_format { if [[ "$format" == false ]]; then cat; else while IFS= read print; do print="${print//' _'/" \e[0;95m"}";print="${print//'_'/"\e[0;67m"}";print="${print//' `'/" \e[0;96m"}";print="${print//'`'/"\e[0;67m"}";print="${print//'# '/"\e[0;95m#\e[0;67m "}";print="${print//'* '/"\e[0;95m*\e[0;67m "}";print="${print//'  - '/"  \e[0;96m-\e[0;67m "}";echo -e "${print//'+ '/"\e[0;96m+\e[0;67m "}"; done; fi; } # function _dt_format { msg="`cat|sed 's/_.*_/\\\e[0;95m&\\\e[0;67m/g;s/\`.*\`/\\\e[0;96m&\\\e[0;67m/g;s/^# /\\\e[0;95m#\\\e[0;67m /g;s/\*/\\\e[0;95m&\\\e[0;67m/g;s/ - / \\\e[0;96m-\\\e[0;67m /g;s/ \([+@#!]\)[^ ]*\b/ \\\e[0;95m&\\\e[0;67m/g;s/^\+ /\\\e[0;96m+\\\e[0;67m /g;s/\, /\\\e[0;67m,\\\e[0;67m /g'`"; msg="${msg//_/}";msg="${msg//\`/}";echo -e "$msg"; }
+function _dt_indent { local replace="$1 " indent="$1" message="$@"; indent="${indent//-/  }" _dt_- "${message/$replace/}"; }
+function _dt_? { bullet='*' _dt_- "$@";  }
+function _dt_logcat { cat `lslogs | grep -E ".*$1.*"`; }; function _dt_search { local search="$@"; cat `lslogs` | grep -iE "$search"; }
+function _dt_validate ( echo "${1:-`lslogs`}" | while read l; do { l=${l//'./'/} h='^  \+ [0-9]+(.[0-9]+)? hours$' eq=;printf "${l/.md/} ";eq+=`grep -E "$h" "$l" | $awk '{print $2}'`;eq+=`grep -E '^\+ .* afk$' -A1 "$l" | grep -E "$h" | $awk '{print -$2}'`;total=`tail -1 "$l" | $awk '{printf("%.2f\n", $3)}'`;eq=`echo $eq | sed 's/ /+/g'`;eq=`$awk "{print $eq}" <<< ''| $awk '{printf("%.2f\n", $1)}'`;eq=`echo $eq $total | $awk '{print $1-$2}'`;[[ "$eq" == 0 ]] && echo 0 || echo 0 $eq -1;} | sed "s/^.* -1$/# &/g;s/^.* 0$/+ &/g" | $awk '{print $1" "$2" "$4}' | _dt_format;done 2>/dev/null ) #| less -R
+function _dt_report { export format=false; _dt_forever; cat [0-9]*.md; _dt_weeks; }
+function _dt_weeks (( echo '# weeks';print() { if [[ "$total" ]]; then echo "+ ${first_date//-/.} - ${last_date//-/.}: $total"; fi; }; for l in `lslogs`; do date="${l/'./'/}"; date="${date/.md/}"; date="${date//./-}"; dow=`date +%u -d$date`; hours=`tail -1 $l | grep '^# .*$' | gawk '{print $3}'`; if [[ "$last_dow" && "$hours" ]] && ((dow>last_dow)); then total=`echo $hours | add $total | round`; else print; first_date="$date" total=$hours; fi; last_dow=$dow last_date=$date; done; print) | _dt_format )
+function _dt_week ( work_week_logs | add_log_hours | _dt_format )
+function work_week_logs ( dow=`date +%u`; i=$dow; while (( i > 0 )); do log=`date +%Y.%m.%d -d "-$((dow-i)) day"`.md; if [[ -f "$log" ]]; then echo "$log"; fi; i=$((--i)); done | tac )
+function write_log { if [[ "$1" ]]; then { if ! log_exists; then echo "# $log_date `date +%A | $awk '{print tolower($1)}'`" > "$log_file"; fi }; echo "$@" >> "$log_file"; _dt_up "$@"; fi; }
+function pop { if log_exists; then local log="`cat "$log_file" | $awk 'NR>1{print buf}{buf=$0}'`"; echo "$log" > "$log_file"; fi; }
+function tags { local print="`cat`"; if [[ -f .tags ]]; then local tags="`cat .tags`"; for tag in $tags; do print=$(sed "s/\b$tag[^ ]*\b/\`&\`/g" <<< $print); done; fi; sed 's/\([+@#!]\)[^ ]*\b/_&_/g'<<<"$print"; } # echo "$print"; } #
+function lslogs { ls -1 ./[0-9][0-9][0-9][0-9].[0-9][0-9].[0-9][0-9].md; }
+function revert_gg { if is_eod; then pop; fi; }
+function task_history { log_exists && grep -E '^\+ [0-9]{2}:[0-9]{2} |^  \+.*[0-9] hours$' "$log_file"; }
+function hour_to_sec { cat | $awk '{print int(60*60*$1)}'; }
+function task_started { task_history | tail -1 | grep -q '^+ [0-9]'; }
+function task_ended { task_history | tail -1 | grep -q '^  +.*[0-9] hours$'; }
+function task_hours { if task_started; then calc_hours $1; fi; }
+function tasks_hours { task_history | grep '^  +' | $awk '{print $2}' | add -`afk` | round; }
+function calc_hours { date +%s -d `task_history | tail -1 | $awk '{print $2}'` | $awk "{print (`time_offset $1`-\$1)/60/60}" | round; }
+function time_offset { if is_time $1; then date +%s -d $(date +%R -d $1); else date +%s; fi; }
+function start_time { task_history | head -1 | $awk '{print $2}'; }
+function new_start { if is_time "$1"; then date +%R -d $1; elif task_ended; then date -d "`completed_time` `completed_sec` seconds" +%R; else date +%R; fi; }
+function completed_time { task_history | tail -2 | head -1 | $awk '{print $2}'; }
+function completed_sec { task_history | tail -1 | $awk '{print $2}' | hour_to_sec; }
+function is_time { [[ "$1" =~ ^[0-9]{1,2}:[0-9]{2}$ ]]; } # function is_value { [[ "$1" =~ ^[0-9]+(\.[0-9]+)?$ ]]; }
+function afk { local f="${1:-$log_file}"; if [[ -f "$f" ]]; then grep -E '^\+ .* afk$' -A1 "$f" | grep '^  +.*[0-9] hours$' | $awk '{print $2}' | add; else echo 0; fi; }
+function is_afk { log_exists && tail -1 "$log_file" | grep -q ' afk$'; }
+function eod { local eod=$2 eod_day=`$awk '{print $1-$2}'<<<"$work_hours_per_day $1"` end_time=; if [[ 1 == "`$awk '{print ($1<$2)}'<<<"$eod_day $eod"`" ]]; then eod=$eod_day; fi; end_time=`$awk '{print int($1*60*60)}'<<<$eod`; end_time=`date +%R -d +${end_time}seconds`; echo "$eod/$end_time"; }
+function is_eod { log_exists && tail -1 "$log_file" | grep -q '^#.*hours$'; }
+function log_exists { [[ -f "$log_file" ]]; } # function remove_first { sed -e 's/^\w*\ *//' <<<$@; }
+function hours { if [[ -f "$@" ]]; then grep '^  +.*hours$' "$@" | $awk '{print $2}' | add -`afk "$@"`; else echo 0; fi; }
+function add { local add=${1:-0}; while read value; do add+="+($value)"; done; $awk "{print $add}" <<< ''; }
+function round { printf '%.*f\n' ${1:-2} `cat`; }
+if [[ ! "$1" ]]; then _dt_mux
+elif [[ "$1" == '--'* ]]; then _dt_indent $@
+elif type _dt_$1 &>/dev/null; then _dt_$@
+else echo "unknown command: $@"; fi

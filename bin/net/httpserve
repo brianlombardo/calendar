@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ "$1" ]]; then cd "$1"; fi
+port="${2:-80}"
+if (( port < 1024 )); then sudo=sudo; else sudo=; fi
+$sudo python3 -m http.server $port

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+
+cd
+quietly 'ls .gitconfig' || gitconfinit
+
+git config --global user.signingkey `gpg-signing-key`
+git config --global commit.gpgsign true
+
